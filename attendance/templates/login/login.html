@@ -1,12 +1,15 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Attendance System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
     <script src="https://cdn.bootcss.com/popper.js/1.15.0/umd/popper.js"></script>
+    <link href="{% static 'login/css/login.css' %}" rel="stylesheet"/>
 </head>
 <body>
     <div class="container">
@@ -22,7 +25,7 @@
                     <input type="password" name="passwd" id="passwd" class="form-control" placeholder="password" required>
                 </div>
                 <div>
-                    <a href="/register/" class="btn btn-outline-secondary"><ins>Sign Up</ins></a>
+                    <!--<a href="/register/" class="btn btn-outline-secondary"><ins>Sign Up</ins></a>-->
                     <button type="submit" class="btn btn-warning float-right">Log in</button>
                 </div>
             </form>
