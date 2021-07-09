@@ -15,7 +15,7 @@ class User(models.Model):
     department = models.CharField(max_length=128)
     on_job = models.DateField(auto_now=False, auto_now_add=False, default=date.today)
     salary = models.PositiveIntegerField()
-    annual = models.PositiveSmallIntegerField()
+    annual = models.PositiveSmallIntegerField(default=0)
     ##identity check
     boss = models.BooleanField(default=False)
     manager = models.BooleanField(default=False)
@@ -24,7 +24,7 @@ class User(models.Model):
     #Meta
     #Methods
 
-class Leave_form(models.Model):
+class Leave(models.Model):
     #Fields
     class Reason(models.TextChoices):
         SICK = '病假'
@@ -41,7 +41,7 @@ class Leave_form(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     start_time = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now)
     end_time = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now)
-    total_time = models.PositiveIntegerField(default=0, help_text='in hours')
+    total_time = models.PositiveSmallIntegerField(default=0, help_text='in hours')
     category = models.CharField(max_length=64, choices=Reason.choices, default=Reason.ANNUAL)
     other_reason = models.CharField(max_length=128, blank=True, null=True, help_text='fill in when above is other' )#used when category=other
     special = models.TextField(blank=True, null=True)
@@ -49,18 +49,27 @@ class Leave_form(models.Model):
     #Meta
     #Methods
 
-class Origin(models.Model):
+class Overtime(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    start_time = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now)
+    end_time = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now)
+    one_third = models.PositiveSmallIntegerField(default=0, help_text='in hours')
+    two_third = models.PositiveSmallIntegerField(default=0, help_text='in hours')
+    double = models.PositiveSmallIntegerField(default=0, help_text='in hours')
+    reason = models.CharField(max_length=256, blank=True, null=True)
+    checked = models.BooleanField(default=False)
+    #Meta
+    #Methods
+
+class Daily(models.Model):
     #Field
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField(default=date.today)
     on_time = models.TimeField(auto_now=False, auto_now_add=False, default=timezone.now)
     off_time = models.TimeField(auto_now=False, auto_now_add=False, default=timezone.now)
-    #Meta
-    #Method
-
-class Edited(Origin):
-    #Field
-    Note = models.TextField(blank=True, null=True)
+    on_time_fixed = models.TimeField(auto_now=False, auto_now_add=False)
+    off_time_fixed = models.TimeField(auto_now=False, auto_now_add=False)
+    fixed_note = models.CharField(max_length=256, blank=True, null=True)
     #Meta
     #Method
 
@@ -69,8 +78,10 @@ class Total(models.Model):
     user_id = models.ForeignKey(User, on_delete=CASCADE)
     year = models.PositiveSmallIntegerField(default=time.localtime(time.time()).tm_year)
     month = models.PositiveSmallIntegerField(default=time.localtime(time.time()).tm_mon)
-    overtime = models.PositiveIntegerField(default=0)#hours
-    delaytime = models.PositiveIntegerField(default=0)#hours
+    #delaytime = models.PositiveIntegerField(default=0)#hours
+    over_13 = models.PositiveSmallIntegerField(default=0)
+    over_23 = models.PositiveSmallIntegerField(default=0)
+    over_2  = models.PositiveSmallIntegerField(default=0)
     leave_00 = models.PositiveIntegerField(default=0)#no salary hours
     leave_01 = models.PositiveIntegerField(default=0)#half salary
     leave_10 = models.PositiveIntegerField(default=0)#full salary
