@@ -15,15 +15,24 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.urls.conf import include
 from attendance import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('index/', views.index),
     path('login/', views.login),
-    path('register/', views.register),
+    path('profile/', views.profile),
+    path('attendance/', views.attendance),
+    path('leave/', views.leave),
     path('logout/', views.logout),
-    #path('list_user/', views.list_user),
-    #path('show_user/user=<int:user_sn>/',),
-    #path('leave_form/',),
+    path('hr/', include([
+        path('menu/', views.hr_menu),
+        path('profile/', views.hr_profile),
+        path('register/', views.hr_register),
+        path('attendance/', views.hr_attendance),
+        path('leave/', views.hr_leave),
+        path('salary/', views.hr_salary),
+        path('bonus/', views.hr_bonus),
+    ])),
 ]

@@ -15,7 +15,7 @@ class User(models.Model):
     department = models.CharField(max_length=128)
     on_job = models.DateField(auto_now=False, auto_now_add=False, default=date.today)
     salary = models.PositiveIntegerField()
-    annual = models.PositiveSmallIntegerField(default=0)
+    annual_left = models.PositiveSmallIntegerField(default=0)
     ##identity check
     boss = models.BooleanField(default=False)
     manager = models.BooleanField(default=False)
@@ -42,6 +42,7 @@ class Leave(models.Model):
     start_time = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now)
     end_time = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now)
     total_time = models.PositiveSmallIntegerField(default=0, help_text='in hours')
+    total = models.PositiveSmallIntegerField(default=0, help_text='in days')
     category = models.CharField(max_length=64, choices=Reason.choices, default=Reason.ANNUAL)
     other_reason = models.CharField(max_length=128, blank=True, null=True, help_text='fill in when above is other' )#used when category=other
     special = models.TextField(blank=True, null=True)

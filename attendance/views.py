@@ -31,7 +31,34 @@ def login(request):
             return render(request, 'login/login.html', {'message': message})
     return render(request, 'login/login.html')
 
-def register(request):
+def profile(request):
+    pass
+    return render(request, 'login/profile')
+
+def attendance(request):
+    pass
+    return render(request, 'login/attendance.html')
+
+def leave(request):
+    pass
+    return render(request, 'login/leave.html')
+
+def logout(request):
+    pass
+    return redirect("/login/")
+
+
+
+def hr_menu(request):
+    if user.hr == False:
+        return redirect("/index/")
+    return render(request, 'hr/hr_menu.html')
+
+def hr_profile(request):
+    pass
+    return render(request, 'hr/hr_profile.html')
+
+def hr_register(request):
     if request.method == 'POST':
         register_form = forms.SignUp(request.POST)
         message = "please check input type."
@@ -53,11 +80,11 @@ def register(request):
             same_id = models.User.objects.filter(user_id=user_id)
             if same_id:
                 message = 'Same user ID.'
-                return render(request, 'login/register.html', locals())
+                return render(request, 'hr/register.html', locals())
             same_email = models.User.objects.filter(email=email)
             if same_email:
                 message = 'Same E-mail.'
-                return render(request, 'login/register.html', locals())
+                return render(request, 'hr/register.html', locals())
             #insert
             new_User = models.User()
             new_User.name = name
@@ -74,20 +101,24 @@ def register(request):
             new_User.staff = staff
             new_User.save()
             #redirect
-            return redirect('/index/')
+            return redirect('/hr/menu/')
         else:
-            return render(request, 'login/register.html', locals())
+            return render(request, 'hr/register.html', locals())
     register_form = forms.SignUp()
-    return render(request, 'login/register.html', locals()) 
-
-def logout(request):
+    return render(request, 'hr/register.html', locals()) 
+    
+def hr_attendance(request):
     pass
-    return redirect("/login/")
+    return render(request, 'hr/attendance.html')
 
-def attendance_record(request):
+def hr_leave(request):
     pass
-    return render(request, 'login/attendance_record.html')
+    return render(request, 'hr/leave.html')
 
-def leave_form(request):
+def hr_salary(request):
     pass
-    return render(request, 'login/leave_form.html')
+    return render(request, 'hr/salary.html')
+
+def hr_bonus(request):
+    pass
+    return render(request, 'hr/bonus.html')
