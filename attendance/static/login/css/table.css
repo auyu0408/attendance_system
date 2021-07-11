@@ -1,0 +1,11 @@
+body {
+    height: 100%;
+    background-image: url('../image/bg.png'); 
+    background-size: cover;
+  }
+  .table-group {
+    width: 100%;
+    max-width: 400px;
+    padding: 15px;
+    margin: 0 auto;
+  }

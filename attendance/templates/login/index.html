@@ -18,12 +18,21 @@
     <div class="container">
         <div class="col">
             <div class="d-grid gap-2 menu-group">
-                <h3>功能列表</h3>
-                <a href='/admin/' class="btn btn-info"><ins>基本資料</ins></a>
-                <a href='/attendance/' class="btn btn-secondary"><ins>出勤</ins></a>
-                <a href='/leave/' class="btn btn-warning"><ins>假單</ins></a>
-                <a href='/hr/menu/' class="btn btn-success"><ins>人事</ins></a>
-                <a href='/logout/' class="btn btn-dark"><ins>登出</ins></a>
+                {% if message %}
+                    <div class="alert alert-secondary">{{ message }}</div>
+                {% endif %}
+                <h3 class="text-center">功能列表</h3>
+                <a href='/profile/' class="btn btn-info">基本資料</a>
+                <a href='/attendance/' class="btn btn-secondary">出勤</a>
+                <a href='/leave/' class="btn btn-warning">假單</a>
+                <a href='/overtime/' class="btn btn-secondary">加班</a>
+                {% if request.session.is_boss == True or request.session.is_manager == True %}
+                    <a href='/check/' class="btn btn-warning">假單與加班核准</a>
+                {% endif %}
+                {% if request.session.is_boss == True or request.session.is_hr == True %}
+                    <a href='/hr/menu/' class="btn btn-success">人事</a>
+                {% endif %}
+                <a href='/logout/' class="btn btn-danger">登出</a>
             </div>
         </div>
     </div>

@@ -20,32 +20,24 @@
 <body>
     <div class="container">
         <div class="col">
-            <form class="form-register" action="/leave/" method="post">
+            <form class="form-register" action="/overtime/" method="post">
                 {% if message %}
                     <div class="alert alert-danger">{{ message }}</div>
                 {% endif %}
                 {% csrf_token %}
-                <h3 class="text-center"><br>假單申請</h3>
+                <h3 class="text-center"><br>加班申請</h3>
                 <p>時間可自行微調</p>
                 <div class="form-group">
-                    {{leave_form.start_time.label_tag}}
-                    {{leave_form.start_time}}
+                    {{overtime_form.start_time.label_tag}}
+                    {{overtime_form.start_time}}
                 </div>
                 <div class="form-group">
-                    {{leave_form.end_time.label_tag}}
-                    {{leave_form.end_time}}
+                    {{overtime_form.end_time.label_tag}}
+                    {{overtime_form.end_time}}
                 </div>
                 <div class="form-group">
-                    {{leave_form.category.label_tag}}
-                    {{leave_form.category}}
-                </div>
-                <div class="form-group">
-                    {{leave_form.other_reason.label_tag}}
-                    {{leave_form.other_reason}}
-                </div>
-                <div class="form-group">
-                    {{leave_form.special.label_tag}}
-                    {{leave_form.special}}
+                    {{overtime_form.reason.label_tag}}
+                    {{overtime_form.reason}}
                 </div>
                 <a href="/index/" class="btn btn-info">回前頁</a>
                 <div>

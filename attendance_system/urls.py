@@ -23,8 +23,11 @@ urlpatterns = [
     path('index/', views.index),
     path('login/', views.login),
     path('profile/', views.profile),
+    path('change_passwd/', views.change_passwd),
     path('attendance/', views.attendance),
     path('leave/', views.leave),
+    path('overtime/', views.overtime),
+    path('check/', views.check),
     path('logout/', views.logout),
     path('hr/', include([
         path('menu/', views.hr_menu),
