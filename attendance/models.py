@@ -22,6 +22,8 @@ class User(models.Model):
     hr = models.BooleanField(default=False)
     staff = models.BooleanField(default=True)
     #Meta
+    class Meta:
+        ordering = ['on_job']
     #Methods
 
 class Leave(models.Model):
@@ -48,6 +50,8 @@ class Leave(models.Model):
     special = models.TextField(blank=True, null=True)
     checked = models.BooleanField(default=False)
     #Meta
+    class Meta:
+        ordering = ['-start_time']
     #Methods
 
 class Overtime(models.Model):
@@ -60,6 +64,8 @@ class Overtime(models.Model):
     reason = models.CharField(max_length=256, blank=True, null=True)
     checked = models.BooleanField(default=False)
     #Meta
+    class Meta:
+        ordering = ['-start_time']
     #Methods
 
 class Daily(models.Model):
@@ -68,10 +74,12 @@ class Daily(models.Model):
     date = models.DateField(default=date.today)
     on_time = models.TimeField(auto_now=False, auto_now_add=False, default=timezone.now)
     off_time = models.TimeField(auto_now=False, auto_now_add=False, default=timezone.now)
-    on_time_fixed = models.TimeField(auto_now=False, auto_now_add=False)
-    off_time_fixed = models.TimeField(auto_now=False, auto_now_add=False)
+    on_time_fixed = models.TimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
+    off_time_fixed = models.TimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     fixed_note = models.CharField(max_length=256, blank=True, null=True)
     #Meta
+    class Meta:
+        ordering = ['date']
     #Method
 
 class Total(models.Model):

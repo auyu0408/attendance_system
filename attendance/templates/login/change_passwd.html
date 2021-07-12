@@ -17,12 +17,12 @@
 <body>
     <div class="container">
         <div class="col">
-            <form class="form-register" action="/change_passwd/" method="post">
+            <form class="form-register" action={{action}} method="post">
                 {% if message %}
                     <div class="alert alert-danger">{{ message }}</div>
                 {% endif %}
                 {% csrf_token %}
-                <h3 class="text-center"><br>修改密碼</h3>
+                <h3 class="text-center"><br>{{title}}</h3>
                 <div class="form-group">
                     {{passwd_form.origin.label_tag}}
                     {{passwd_form.origin}}
@@ -31,7 +31,7 @@
                     {{passwd_form.new.label_tag}}
                     {{passwd_form.new}}
                 </div>
-                <a href="/index/" class="btn btn-info">回功能列表</a>
+                <a href={{back}} class="btn btn-info">回前頁</a>
                 <div>
                     <br>
                     <button type="submit" class="btn btn-warning">提交</button> 

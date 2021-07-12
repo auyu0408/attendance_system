@@ -41,8 +41,13 @@
                     <td>特休:</td><td>{{annual}}日</td>
                 </tr>
             </table>
-            <a href="/index/" class="btn btn-info">回前頁</a>
-            <a href="/change_passwd/" class="btn btn-warning">更改密碼</a>
+            <a href={{back}} class="btn btn-info">回前頁</a>
+            {% if back == "/index/" %}
+                <a href="/change_passwd/" class="btn btn-warning">更改密碼</a>
+            {% endif %}
+            {% if back == "/hr/profile/" %}
+                <a href="/hr/edit/{{id}}/" class="btn btn-secondary">修改資料</a>
+            {% endif %}
         </div>
     </div>
 </body>

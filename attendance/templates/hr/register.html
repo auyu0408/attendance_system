@@ -20,9 +20,9 @@
 <body>
     <div class="container">
         <div class="col">
-            <form class="form-register" action="/hr/register/" method="post">
+            <form class="form-register" action={{action}} method="post">
                 {% csrf_token %}
-                <h3 class="text-center"><br>SignUp</h3>
+                <h3 class="text-center"><br>{{title}}</h3>
                 <div class="form-group">
                     {{register_form.name.label_tag}}
                     {{register_form.name}}
@@ -64,10 +64,10 @@
                     {{register_form.boss}}
                     {{register_form.boss.label}}
                 </div>
-                <a href="/hr/menu/" class="btn btn-info">回前頁</a>
+                <a href={{back}} class="btn btn-info">回前頁</a>
                 <div>
                     <br>
-                    <button type="submit" class="btn btn-warning">Sign Up</button> 
+                    <button type="submit" class="btn btn-warning">Submit</button> 
                 </div>
             </form>
         </div>
