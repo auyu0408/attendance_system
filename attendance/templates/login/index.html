@@ -24,10 +24,10 @@
                 <h3 class="text-center">功能列表</h3>
                 <a href='/profile/' class="btn btn-info">基本資料</a>
                 <a href='/attendance/' class="btn btn-secondary">出勤</a>
-                <a href='/leave/' class="btn btn-warning">假單</a>
+                <a href='/leave_list/' class="btn btn-warning">假單</a>
                 <a href='/overtime_list/' class="btn btn-secondary">加班</a>
                 {% if request.session.is_boss == True or request.session.is_manager == True %}
-                    <a href='/check/' class="btn btn-warning">假單與加班核准</a>
+                    <a href='/check_list/' class="btn btn-warning">假單與加班核准</a>
                 {% endif %}
                 {% if request.session.is_boss == True or request.session.is_hr == True %}
                     <a href='/hr/menu/' class="btn btn-success">人事</a>

@@ -94,15 +94,15 @@ def leave(request,id=0):
             leave.category = leave_form.cleaned_data.get('category')
             leave.other_reason = leave_form.cleaned_data.get('other_reason')
             leave.special = leave_form.cleaned_data.get('special')
-        #get user
-        if id==0:
-            leave.user_id = models.User.objects.get(id=request.session['user_id'])
-        #insert
-        leave.checked = False
-        leave.save()
-        message = "申請成功"
-        #redirect
-        return render(request, 'login/index.html', locals())
+            leave.checked = False
+            #get user
+            if id==0:
+                leave.user_id = models.User.objects.get(id=request.session['user_id'])
+            #insert
+            leave.save()
+            message = "申請成功"
+            #redirect
+            return render(request, 'login/index.html', locals())
     if id==0:
         leave_form = forms.LeaveForm()
     else:
@@ -110,6 +110,22 @@ def leave(request,id=0):
                                                 'category':leave.category, 'other_reason':leave.other_reason,
                                                 'special':leave.special})
     return render(request, 'login/leave.html', locals())
+
+def leave_list(request):
+    checked = "已核准假單"
+    unchecked = "未核准假單"
+    checks = models.Leave.objects.filter(user_id=request.session['user_id'], checked=True)
+    n_checks = models.Leave.objects.filter(user_id=request.session['user_id'], checked=False)
+    apply = "請假申請"
+    href = "/leave/"
+    title = "leave"
+    return render(request, 'login/list.html', locals())
+
+def show_leave(request, id):
+    leave = models.Leave.objects.get(id=id)
+    if not request.session.get('is_login', None):
+        return redirect("/login/")
+    return render(request, "login/display_leave.html", locals())
 
 def overtime(request, id=0):
     if not request.session.get('is_login', None):
@@ -144,7 +160,24 @@ def overtime(request, id=0):
                                                 'reason':overtime.reason,})
     return render(request, 'login/overtime.html', locals())
 
-def check(request):
+def overtime_list(request):
+    checked = "已核准加班單"
+    unchecked = "未核准加班單"
+    checks = models.Overtime.objects.filter(user_id=request.session['user_id'], checked=True)
+    n_checks = models.Overtime.objects.filter(user_id=request.session['user_id'], checked=False)
+    apply = "加班申請"
+    href = "/overtime/"
+    title = "overtime"
+    return render(request, 'login/list.html', locals())
+
+def show_overtime(request, id):
+    overtime = models.Overtime.objects.get(id=id)
+    if not request.session.get('is_login', None):
+        return redirect("/login/")
+    back ="/index/"
+    return render(request, "login/display_overtime.html", locals())
+
+def check_list(request):
     if not request.session.get('is_login', None):
         return redirect("/login/")
     if not request.session.get('is_manager', None) and not request.session.get('is_boss', None):
@@ -163,7 +196,21 @@ def check(request):
         n_overtimes = models.Overtime.objects.filter(checked=False, user_id__department=user.department).exclude(user_id=user.id)
         overtimes = models.Overtime.objects.filter(checked=True, user_id__department=user.department).exclude(user_id=user.id)
     
-    return render(request, 'login/check.html', locals())
+    return render(request, 'login/check_list.html', locals())
+
+def check(request):
+    if request.method=="POST":
+        id =request.POST['form_id']
+        form_type = request.POST['form_type']
+        if form_type == "leave":
+            leave = models.Leave.objects.get(id=id)
+            leave.checked = True
+            leave.save()
+        else:
+            overtime = models.Overtime.objects.get(id=id)
+            overtime.checked = True
+            overtime.save()
+    return redirect(f"/display_{form_type}/{id}/")
 
 def logout(request):
     if not request.session.get('is_login', None):
@@ -197,13 +244,13 @@ def hr_personal(request, id):
     back = "/hr/profile/"
     return render(request, 'login/profile.html', locals())
 
-def hr_edit(request, usid):
+def hr_edit(request, id):
     if not request.session.get('is_login', None):
         return redirect("/login/")
     if request.method == 'POST':
         register_form = forms.SignUp(request.POST)
         if register_form.is_valid():
-            user = models.User.objects.get(id=usid)
+            user = models.User.objects.get(id=id)
             user.name = register_form.cleaned_data.get('name')
             user.email = register_form.cleaned_data.get('email')
             user.department = register_form.cleaned_data.get('department')
@@ -217,8 +264,8 @@ def hr_edit(request, usid):
             return redirect(f'/hr/profile/{user.id}/')
     func = "edit"
     title = "修改資料"
-    action = f"/hr/edit/{usid}/"
-    user = models.User.objects.get(id=usid)
+    action = f"/hr/edit/{id}/"
+    user = models.User.objects.get(id=id)
     register_form = forms.SignUp(initial={'name':user.name, 'email':user.email, 'user_id':user.user_id,
                         'passwd':user.passwd, 'department':user.department,
                         'on_job':user.on_job, 'salary':user.salary, 'boss':user.boss, 'hr':user.hr,
@@ -285,10 +332,43 @@ def hr_attendance(request):
         return redirect("/login/")
     return render(request, 'hr/attendance.html')
 
-def hr_leave(request):
+def hr_leave(request, id=0):
     if not request.session.get('is_login', None):
         return redirect("/login/")
-    return render(request, 'hr/leave.html')
+    if id == 0:
+        mode = "user"
+        objects = models.User.objects.all()
+        title = "請選擇員工"
+        href = "/hr/leave"
+        back = "/hr/menu/"
+        return render(request, 'hr/leave.html', locals())
+    else:
+        mode = "leave"
+        users = models.User.objects.get(id=id)
+        objects = models.Leave.objects.filter(user_id=id, checked=True)
+        title = f"{users.name}的已核准價單"
+        href = "/display_leave"
+        back = "/hr/leave/"
+        return render(request, 'hr/leave.html', locals())
+
+def hr_overtime(request, id=0):
+    if not request.session.get('is_login', None):
+        return redirect("/login/")
+    if id == 0:
+        mode = "user"
+        objects = models.User.objects.all()
+        title = "請選擇員工"
+        href = "/hr/overtime"
+        back = "/hr/menu/"
+        return render(request, 'hr/list.html', locals())
+    else:
+        mode = "leave"
+        users = models.User.objects.get(id=id)
+        objects = models.Overtime.objects.filter(user_id=id, checked=True)
+        title = f"{users.name}的已核准價單"
+        href = "/display_overtime"
+        back = "/hr/overtime/"
+        return render(request, 'hr/list.html', locals())
 
 def hr_salary(request):
     if not request.session.get('is_login', None):

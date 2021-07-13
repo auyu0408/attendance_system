@@ -20,7 +20,7 @@
 <body>
     <div class="container">
         <div class="col">
-            <form class="form-register" action="/overtime/" method="post">
+            <form class="form-register" action="/overtime/{{id}}/" method="post">
                 {% if message %}
                     <div class="alert alert-danger">{{ message }}</div>
                 {% endif %}
@@ -39,7 +39,7 @@
                     {{overtime_form.reason.label_tag}}
                     {{overtime_form.reason}}
                 </div>
-                <a href="/index/" class="btn btn-info">回前頁</a>
+                <a href="/overtime_list/" class="btn btn-info">回加班列表</a>
                 <div>
                     <br>
                     <button type="submit" class="btn btn-warning">提交</button> 

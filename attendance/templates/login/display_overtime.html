@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Attendance System</title>
+    <!--bootstrap-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <!--jquery-->
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+    <script src="https://cdn.bootcss.com/popper.js/1.15.0/umd/popper.js"></script>
+    <!--style.css-->
+    <link href="{% static 'login/css/table.css' %}" rel="stylesheet"/>
+</head>
+<body>
+    <div class="container">
+        <div class="col table-group">
+            <h3 class="text-center"><br>{{overtime.user_id.name}}加班單</h3>
+            <table class="table table-secondary table-hover table-responsive">
+                <tr>
+                    <td>姓名:</td><td>{{overtime.user_id.name}}</td>
+                </tr>
+                <tr>
+                    <td>開始時間:</td><td>{{overtime.start_time}}</td>
+                </tr>
+                <tr>
+                    <td>結束時間:</td><td>{{overtime.end_time}}</td>
+                </tr>
+                <tr>
+                    <td>總計:</td><td>{{overtime.total_time}}時</td>
+                </tr>
+                <tr>
+                    <td>原因:</td><td>{{overtime.reason}}</td>
+                </tr>
+                <tr>
+                    <td>是否核准:</td><td>{% if overtime.checked %}是{% else %}否{% endif %}</td>
+                </tr>
+            </table>
+            <a href="{{back}}" class="btn btn-info">回前頁</a>
+            {% if request.session.user_id == overtime.user_id.id %}
+                <a href="/overtime/{{id}}/" class="btn btn-secondary">修改假卡</a>
+            {% endif %}
+            {% if request.session.is_manager == True or request.session.is_boss == True %}
+            {% if overtime.checked == False %}
+                <form action="/check/" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_id" value="{{overtime.id}}">
+                    <input type="hidden" name="form_type" value="overtime">
+                    <br>
+                    <button type="submit" class="btn btn-warning">核准</button>
+                </form>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

@@ -20,7 +20,7 @@
 <body>
     <div class="container">
         <div class="col">
-            <form class="form-register" action="/leave/" method="post">
+            <form class="form-register" action="/leave/{{id}}/" method="post">
                 {% if message %}
                     <div class="alert alert-danger">{{ message }}</div>
                 {% endif %}
@@ -47,7 +47,7 @@
                     {{leave_form.special.label_tag}}
                     {{leave_form.special}}
                 </div>
-                <a href="/index/" class="btn btn-info">回前頁</a>
+                <a href="/leave_list/" class="btn btn-info">回假單列表</a>
                 <div>
                     <br>
                     <button type="submit" class="btn btn-warning">提交</button> 

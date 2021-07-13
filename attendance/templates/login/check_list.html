@@ -20,25 +20,25 @@
             <h3 class="text-center"><br>未核准假單</h3>
             <ul class="list-group list">
                 {% for n_leave in n_leaves %}
-                <a href ="/leave/{{n_leave.id}}/" class="list-group-item list-group-item-light list-group-item-action">{{n_leave.user_id.name}} 請假日:{{n_leave.start_time.month}}/{{n_leave.start_time.day}}</a> 
+                <a href ="/display_leave/{{n_leave.id}}/" class="list-group-item list-group-item-light list-group-item-action">{{n_leave.user_id.name}} 請假日:{{n_leave.start_time.month}}/{{n_leave.start_time.day}}</a> 
                 {% endfor %}
             </ul>
-            <h3 class="text-center"><br>已核准加班單</h3>
+            <h3 class="text-center"><br>未核准加班單</h3>
             <ul class="list-group list">
                 {% for n_overtime in n_overtimes %}
-                <a href ="/overtime/{{n_overtime.id}}/" class="list-group-item list-group-item-light list-group-item-action">{{n_overtime.user_id.name}} 請假日:{{n_overtime.start_time.month}}/{{n_overtime.start_time.day}}</a> 
+                <a href ="/display_overtime/{{n_overtime.id}}/" class="list-group-item list-group-item-light list-group-item-action">{{n_overtime.user_id.name}} 請假日:{{n_overtime.start_time.month}}/{{n_overtime.start_time.day}}</a> 
                 {% endfor %}
             </ul>
             <h3 class="text-center"><br>已核准假單</h3>
             <ul class="list-group list">
                 {% for leave in leaves %}
-                <a href ="/leave/{{n_leave.id}}/" class="list-group-item list-group-item-light list-group-item-action">{{leave.user_id.name}} 請假日:{{leave.start_time.month}}/{{leave.start_time.day}}</a> 
+                <a href ="/display_leave/{{leave.id}}/" class="list-group-item list-group-item-light list-group-item-action">{{leave.user_id.name}} 請假日:{{leave.start_time.month}}/{{leave.start_time.day}}</a> 
                 {% endfor %}
             </ul>
             <h3 class="text-center"><br>已核准加班單</h3>
             <ul class="list-group list">
                 {% for overtime in overtimes %}
-                <a href ="/overtime/{{overtime.id}}/" class="list-group-item list-group-item-light list-group-item-action">{{overtime.user_id.name}} 請假日:{{overtime.start_time.month}}/{{overtime.start_time.day}}</a> 
+                <a href ="/dispaly_overtime/{{overtime.id}}/" class="list-group-item list-group-item-light list-group-item-action">{{overtime.user_id.name}} 請假日:{{overtime.start_time.month}}/{{overtime.start_time.day}}</a> 
                 {% endfor %}
             </ul>
             <div>
