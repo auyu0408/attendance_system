@@ -1,4 +1,5 @@
 from django.core.checks import messages
+from django.http import request
 from django.http.response import HttpResponse
 from django.shortcuts import redirect, render
 from . import models
@@ -78,6 +79,7 @@ def attendance(request):
         return redirect("/login/")
     return render(request, 'login/attendance.html')
 
+
 def leave(request,id=0):
     if not request.session.get('is_login', None):
         return redirect("/login/")
@@ -122,10 +124,18 @@ def leave_list(request):
     return render(request, 'login/list.html', locals())
 
 def show_leave(request, id):
-    leave = models.Leave.objects.get(id=id)
+    user = models.User.objects.get(id=request.session['user_id'])
+    try:
+        leave = models.Leave.objects.get(id=id)
+    except:
+        return redirect("/leave_list/")
     if not request.session.get('is_login', None):
         return redirect("/login/")
-    return render(request, "login/display_leave.html", locals())
+    if request.session['user_id'] == leave.user_id.id or (request.session['is_manager'] and user.department == leave.user_id.department) or request.session['is_hr']:
+        return render(request, "login/display_leave.html", locals())
+    else:
+        redirect("/leave_list/")
+
 
 def overtime(request, id=0):
     if not request.session.get('is_login', None):
@@ -171,11 +181,18 @@ def overtime_list(request):
     return render(request, 'login/list.html', locals())
 
 def show_overtime(request, id):
-    overtime = models.Overtime.objects.get(id=id)
+    user = models.User.objects.get(id=request.session['user_id'])
+    try:
+        overtime = models.Overtime.objects.get(id=id)
+    except:
+        return redirect("/overtime_list/")
     if not request.session.get('is_login', None):
         return redirect("/login/")
-    back ="/index/"
-    return render(request, "login/display_overtime.html", locals())
+    if request.session['user_id'] == overtime.user_id.id or (request.session['is_manager'] and user.department == leave.user_id.department) or request.session['is_hr']:
+        return render(request, "login/display_leave.html", locals())
+    else:
+        redirect("/leave_list/")
+
 
 def check_list(request):
     if not request.session.get('is_login', None):
@@ -223,30 +240,32 @@ def logout(request):
     #del request.session['user_name']
     return redirect("/login/")
 
+
 def hr_menu(request):
-    if not request.session.get('is_login', None):
-        return redirect("/login/")
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
     return render(request, 'hr/hr_menu.html')
 
 def hr_profile(request):
-    if not request.session.get('is_login', None):
-        return redirect("/login/")
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
     users = models.User.objects.all()
     return render(request, 'hr/hr_profile.html', locals())
 
 def hr_personal(request, id):
-    if not request.session.get('is_login', None):
-        return redirect("/login/")
     if not request.session.get('is_hr', None):
         return redirect("/index/")
-    user = models.User.objects.get(id=id)
+    try:
+        user = models.User.objects.get(id=id)
+    except:
+        return redirect("/hr/profile/")
     annual = 0
     back = "/hr/profile/"
     return render(request, 'login/profile.html', locals())
 
 def hr_edit(request, id):
-    if not request.session.get('is_login', None):
-        return redirect("/login/")
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
     if request.method == 'POST':
         register_form = forms.SignUp(request.POST)
         if register_form.is_valid():
@@ -274,8 +293,8 @@ def hr_edit(request, id):
     return render(request, 'hr/register.html', locals())
 
 def hr_register(request):
-    if not request.session.get('is_login', None):
-        return redirect("/login/")
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
     if request.method == 'POST':
         register_form = forms.SignUp(request.POST)
         message = "please check input type."
@@ -326,22 +345,23 @@ def hr_register(request):
     action = "/hr/register/"
     title = "建立員工資料"
     return render(request, 'hr/register.html', locals()) 
-    
+
+
 def hr_attendance(request):
-    if not request.session.get('is_login', None):
-        return redirect("/login/")
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
     return render(request, 'hr/attendance.html')
 
 def hr_leave(request, id=0):
-    if not request.session.get('is_login', None):
-        return redirect("/login/")
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
     if id == 0:
         mode = "user"
         objects = models.User.objects.all()
         title = "請選擇員工"
         href = "/hr/leave"
         back = "/hr/menu/"
-        return render(request, 'hr/leave.html', locals())
+        return render(request, 'hr/list.html', locals())
     else:
         mode = "leave"
         users = models.User.objects.get(id=id)
@@ -349,11 +369,11 @@ def hr_leave(request, id=0):
         title = f"{users.name}的已核准價單"
         href = "/display_leave"
         back = "/hr/leave/"
-        return render(request, 'hr/leave.html', locals())
+        return render(request, 'hr/list.html', locals())
 
 def hr_overtime(request, id=0):
-    if not request.session.get('is_login', None):
-        return redirect("/login/")
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
     if id == 0:
         mode = "user"
         objects = models.User.objects.all()
@@ -365,46 +385,83 @@ def hr_overtime(request, id=0):
         mode = "leave"
         users = models.User.objects.get(id=id)
         objects = models.Overtime.objects.filter(user_id=id, checked=True)
-        title = f"{users.name}的已核准價單"
+        title = f"{users.name}的已核准加班單"
         href = "/display_overtime"
         back = "/hr/overtime/"
         return render(request, 'hr/list.html', locals())
 
 def hr_salary(request):
-    if not request.session.get('is_login', None):
-        return redirect("/login/")
-    if request.sessiion.get('is_salary', None):
-        return render(request, 'hr/salary.html')
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
+    if not request.session.get('is_salary', None):
+        return redirect("/hr/salary_pass/")
     else:
+        return render(request, "hr/salary.html")
+
+def salary_pass(request):
+    try:
+        admin_user = models.User.objects.get(name="admin")
+    except:
         return redirect("/hr/menu/")
+    message = ""
+    if request.session.get('is_salary', None):
+        return redirect("/hr/menu/")
+    if request.method == "POST":
+        password = request.POST.get('passwd')
+        if check_password(password, admin_user.passwd):
+            request.session['is_salary'] = True
+            return redirect("/hr/menu/")
+        else:
+            message = "Wrong password"
+    return render(request, 'hr/salary_pass.html', {'message': message})
 
 def hr_passwd(request):
-    if not request.session.get('is_login', None):
-        return redirect("/login/")
+    try:
+        admin = models.User.objects.get(name="admin")
+    except:
+        return redirect("/hr/menu/")
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
     title = "修改薪資密碼"
     action = "/hr/change_passwd/"
     back = "/hr/menu"
     #get 
     if request.method == 'POST':
         #change to admin passwd
-        user = models.User.objects.get(id=request.session['user_id'])
         hr_passwd = forms.Passwd(request.POST)
         if hr_passwd.is_valid():
             origin = hr_passwd.cleaned_data.get('origin')
-            if  check_password(origin, user.passwd):
+            if  check_password(origin, admin.passwd):
                 new = hr_passwd.cleaned_data.get('new')
                 password = make_password(new)
-                user.passwd = password
-                user.save()
+                admin.passwd = password
+                admin.save()
                 del request.session['is_salary']
                 return redirect("/hr/menu/")
             else:
                 message = "原密碼錯誤"
+                passwd_form = forms.Passwd()
                 return render(request, 'login/change_passwd.html', locals())
     passwd_form = forms.Passwd()
     return render(request, 'login/change_passwd.html', locals())
 
 def hr_bonus(request):
-    if not request.session.get('is_login', None):
-        return redirect("/login/")
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
+    if not request.session.get('is_salary', None):
+        return redirect("/hr/salary_pass/")
     return render(request, 'hr/bonus.html')
+
+def check_in_out(request):
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
+    message = ""
+    if request.method == "POST":
+        user_id = request.POST.get('user_id')
+        try:
+            user = models.User.objects.get(user_id=user_id)
+        except:
+            message = "Wrong ID."
+            return render(request, 'hr/check_in_out.html', {'message': message})
+        message = f"{user.name}簽到成功"
+    return render(request, 'hr/check_in_out.html', {'message': message})
