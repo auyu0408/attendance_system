@@ -5,6 +5,7 @@ from django.shortcuts import redirect, render
 from . import models
 from . import forms
 from django.contrib.auth.hashers import check_password, make_password
+from . import function
 
 # Create your views here.
 def index(request):
@@ -335,6 +336,10 @@ def hr_register(request):
             new_User.hr = hr
             new_User.manager = manager
             new_User.staff = staff
+            #get level
+            new_User.labor = function.find_labor(salary)
+            new_User.health = function.find_health(salary)
+            new_User.retirement = function.find_retirement(salary)
             new_User.save()
             #redirect
             return redirect('/hr/menu/')

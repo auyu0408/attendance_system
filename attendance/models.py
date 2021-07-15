@@ -15,10 +15,12 @@ class User(models.Model):
     department = models.CharField(max_length=128)
     on_job = models.DateField(auto_now=False, auto_now_add=False, default=date.today)
     salary = models.PositiveIntegerField()
+    annual = models.PositiveSmallIntegerField(default=0)
     annual_left = models.PositiveSmallIntegerField(default=0)
     #Deductible 
     labor = models.PositiveSmallIntegerField(default=1)
     health = models.PositiveSmallIntegerField(default=1)
+    family = models.PositiveSmallIntegerField(default=0)
     retirement = models.PositiveSmallIntegerField(default=1)
     retire_self =models.PositiveSmallIntegerField(default=0)
     ##identity check
