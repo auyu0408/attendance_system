@@ -16,12 +16,12 @@ def convert_health(level):
     return health_money
 
 def convert_retirement(level):
-    retirement = stander[3][level]
-    return retirement
+    retirement_money = stander[3][level]
+    return retirement_money
 
 def find_labor(money):
     for x in range(16):
-        if stander[0][x] > money:
+        if stander[0][x]+1 > money:
             labor = x
             return labor
     labor = 15
@@ -29,7 +29,7 @@ def find_labor(money):
 
 def find_health(money):
     for x in range(48):
-        if stander[0][x] > money:
+        if stander[0][x]+1 > money:
             health = x
             return health
     health = 47
@@ -37,20 +37,50 @@ def find_health(money):
 
 def find_retirement(money):
     for x in range(43):
-        if stander[0][x] > money:
+        if stander[0][x]+1 > money:
             retirement = x
             return retirement
     retirement = 42
     return retirement
 
-def get_annual(year,month,day):
-    d1 = datetime.datetime(year,month,day)
-    d2 = datetime.datetime.now()
-    interval = d2-d1
-    return interval
+def retire_M(level):
+    money = stander[0][level]
+    return money
 
+def get_annual(year,month,day):
+    new_year = year
+    new_month = month+6 
+    if month+6 > 12:
+        new_year = year +1
+        new_month = month - 6
+    if datetime.datetime.now() < datetime.datetime(new_year, new_month, day):
+        annual = 0
+    elif datetime.datetime.now() < datetime.datetime(year+1, month, day):
+        annual = 3
+    elif datetime.datetime.now() < datetime.datetime(year+2, month, day):
+        annual = 7
+    elif datetime.datetime.now() < datetime.datetime(year+3, month, day):
+        annual = 10
+    elif datetime.datetime.now() < datetime.datetime(year+5, month, day):
+        annual = 14
+    elif datetime.datetime.now() < datetime.datetime(year+10, month, day):
+        annual = 15
+    else:
+        for i in range(11,25,1):
+            if datetime.datetime.now() < datetime.datetime(year+i, month, day):
+                annual = 5 + i
+                break
+        if datetime.datetime.now() >= datetime.datetime(year+25, month, day):
+            annual = 30
+    return annual
+
+def get_day(start_time, end_time):
+    return
+
+def get_hour():
+    return
 
 #test case
 #print (find_labor(80000), find_health(80000), find_retirement(80000))
 #print (convert_labor(find_labor(80000)), convert_health(find_health(80000)), convert_retirement(find_retirement(80000)))
-print (get_annual(2021,5,5))
+#print (get_annual(1997,7,17))

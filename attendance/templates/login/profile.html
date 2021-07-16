@@ -1,19 +1,4 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Attendance System</title>
-    <!--bootstrap-->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-    <!--jquery-->
-    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
-    <script src="https://cdn.bootcss.com/popper.js/1.15.0/umd/popper.js"></script>
-    <!--style.css-->
-    <link href="{% static 'login/css/table.css' %}" rel="stylesheet"/>
-</head>
+{%include "../templates.html"%}
 <body>
     <div class="container">
         <div class="col table-group">
@@ -35,10 +20,29 @@
                     <td>底薪:</td><td>{{user.salary}}</td>
                 </tr>
                 <tr>
-                    <td>到職日:</td><td>{{user.on_job}}</td>
+                    <td>到職日:</td><td>{{user.on_job.year}},{{user.on_job.month}},{{user.on_job.day}}</td>
                 </tr>
                 <tr>
-                    <td>特休:</td><td>{{annual}}日</td>
+                    <td>特休:</td><td>{{user.annual}}日, 剩餘{{user.annual_left}}日</td>
+                </tr>
+            </table>
+            <h4 class="text-center"><br>健保</h4>
+            <table class="table table-secondary table-hover table-responsive">
+                <tr>
+                    <td>生效日期:</td><td>{{user.on_job.year}},{{user.on_job.month}},{{user.on_job.day}}</td><td>等級：</td><td>{{user.health}}</td>
+                </tr>
+            </table>
+            <h4 class="text-center"><br>勞保</h4>
+            <table class="table table-secondary table-hover table-responsive">
+                <tr>
+                    <td>生效日期:</td><td>{{user.on_job.year}},{{user.on_job.month}},{{user.on_job.day}}</td><td>等級：</td><td>{{user.labor}}</td>
+                </tr>
+            </table>
+            <h4 class="text-center"><br>退休金</h4>
+            <table class="table table-secondary table-hover table-responsive">
+                <tr>
+                    <td>生效日期:</td><td>{{user.on_job.year}},{{user.on_job.month}},{{user.on_job.day}}</td><td>等級：</td><td>{{user.retirement}}</td>
+                    <td>自提撥:</td><td>{{user.retire_self}}</td>
                 </tr>
             </table>
             <a href={{back}} class="btn btn-info">回前頁</a>
@@ -51,4 +55,3 @@
         </div>
     </div>
 </body>
-</html>

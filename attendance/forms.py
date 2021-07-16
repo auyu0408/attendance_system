@@ -18,6 +18,7 @@ class SignUp(forms.Form):
     hr = forms.BooleanField(label="HR", required=False)
     manager = forms.BooleanField(label="Manager", required=False)
     staff = forms.BooleanField(label="Staff", required=True)
+    self_percent = forms.IntegerField(label="Self", widget=forms.TextInput(attrs={'class':'form-control'}),initial=0)
 
 class LeaveForm(forms.Form):
     Reason=(

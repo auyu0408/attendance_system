@@ -1,8 +1,28 @@
-body   {
+body {
     height: 100%;
     background-image: url('../image/bg.png'); 
     background-size: cover;
-
+  }
+  .form-register {
+    width: 100%;
+    max-width: 400px;
+    padding: 15px;
+    margin: 0 auto;
+  }
+  .form-group {
+    margin-bottom: 5px;
+  }
+  .menu-group {
+    width: 100%;
+    max-width: 400px;
+    padding: 15px;
+    margin: 0 auto;
+  }
+  .list {
+    width: 100%;
+    max-width: 400px;
+    padding: 15px;
+    margin: 0 auto;
   }
   .form-login {
     width: 100%;
@@ -40,4 +60,10 @@ body   {
     margin-top:25px;
     font-size: 12px;
     line-height: 10px;
+  }
+  .table-group {
+    width: 120%;
+    max-width: 450px;
+    padding: 15px;
+    margin: 0 auto;
   }

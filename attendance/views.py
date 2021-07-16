@@ -55,7 +55,6 @@ def change_passwd(request):
     if not request.session.get('is_login', None):
         return redirect("/login/")
     title = "修改密碼"
-    action = "/change_passwd/"
     back = "/index/"
     #get 
     if request.method == 'POST':
@@ -159,7 +158,7 @@ def overtime(request, id=0):
         overtime.one_third = 0
         overtime.two_third = 0
         overtime.double = 0
-        overtime.check = False
+        overtime.checked = False
         overtime.save()
         message = "申請成功"
         #redirect
@@ -189,8 +188,8 @@ def show_overtime(request, id):
         return redirect("/overtime_list/")
     if not request.session.get('is_login', None):
         return redirect("/login/")
-    if request.session['user_id'] == overtime.user_id.id or (request.session['is_manager'] and user.department == leave.user_id.department) or request.session['is_hr']:
-        return render(request, "login/display_leave.html", locals())
+    if request.session['user_id'] == overtime.user_id.id or (request.session['is_manager'] and user.department == overtime.user_id.department) or request.session['is_hr']:
+        return render(request, "login/display_overtime.html", locals())
     else:
         redirect("/leave_list/")
 
@@ -203,10 +202,10 @@ def check_list(request):
         return render(request, 'login/index.html', {'message':message})
     user = models.User.objects.get(id=request.session['user_id'])
     if user.boss:
-        n_leaves = models.Leave.objects.filter(checked=False, user_id__manager=True)
-        leaves = models.Leave.objects.filter(checked=True, user_id__manager=True)
-        n_overtimes = models.Overtime.objects.filter(checked=False, user_id__manager=True)
-        overtimes = models.Overtime.objects.filter(checked=True, user_id__manager=True)
+        n_leaves = models.Leave.objects.filter(user_id__manager=True, checked=False)
+        leaves = models.Leave.objects.filter(user_id__manager=True, checked=True)
+        n_overtimes = models.Overtime.objects.filter(user_id__manager=True, checked=False)
+        overtimes = models.Overtime.objects.filter(user_id__manager=True, checked=True)
     
     else:
         n_leaves = models.Leave.objects.filter(checked=False, user_id__department=user.department).exclude(user_id=user.id)
@@ -260,7 +259,6 @@ def hr_personal(request, id):
         user = models.User.objects.get(id=id)
     except:
         return redirect("/hr/profile/")
-    annual = 0
     back = "/hr/profile/"
     return render(request, 'login/profile.html', locals())
 
@@ -280,6 +278,14 @@ def hr_edit(request, id):
             user.hr = register_form.cleaned_data.get('hr')
             user.manager = register_form.cleaned_data.get('manager')
             user.staff = register_form.cleaned_data.get('staff')
+            user.self_percent= register_form.cleaned_data.get('self_percent')
+            #get level
+            user.labor = function.find_labor(user.salary)
+            user.health = function.find_health(user.salary)
+            user.retirement = function.find_retirement(user.salary)
+            user.retire_self = function.retire_M(user.retirement)*user.self_percent/100
+            user.annual = function.get_annual(user.on_job.year, user.on_job.month, user.on_job.day)
+            user.annual_left = user.annual - 0
             user.save()
             return redirect(f'/hr/profile/{user.id}/')
     func = "edit"
@@ -289,7 +295,7 @@ def hr_edit(request, id):
     register_form = forms.SignUp(initial={'name':user.name, 'email':user.email, 'user_id':user.user_id,
                         'passwd':user.passwd, 'department':user.department,
                         'on_job':user.on_job, 'salary':user.salary, 'boss':user.boss, 'hr':user.hr,
-                        'manager':user.manager, 'staff':user.staff,})
+                        'manager':user.manager, 'staff':user.staff, 'retire_self':user.self_percent,})
     back = f"/hr/profile/{user.id}/"
     return render(request, 'hr/register.html', locals())
 
@@ -300,17 +306,21 @@ def hr_register(request):
         register_form = forms.SignUp(request.POST)
         message = "please check input type."
         if register_form.is_valid():
-            name = register_form.cleaned_data.get('name')
+            #insert
+            new_User = models.User()
+            new_User.name = register_form.cleaned_data.get('name')
+            new_User.department = register_form.cleaned_data.get('department')
+            new_User.salary = register_form.cleaned_data.get('salary')
+            new_User.on_job = register_form.cleaned_data.get('on_job')
+            new_User.boss = register_form.cleaned_data.get('boss')
+            new_User.hr = register_form.cleaned_data.get('hr')
+            new_User.manager = register_form.cleaned_data.get('manager')
+            new_User.staff = register_form.cleaned_data.get('staff')
+            new_User.self_percent = register_form.cleaned_data.get('self_percent')
+
             user_id = register_form.cleaned_data.get('user_id')
             passwd = register_form.cleaned_data.get('passwd')
             email = register_form.cleaned_data.get('email')
-            department =register_form.cleaned_data.get('department')
-            on_job = register_form.cleaned_data.get('on_job')
-            salary = register_form.cleaned_data.get('salary')
-            boss = register_form.cleaned_data.get('boss')
-            hr = register_form.cleaned_data.get('hr')
-            manager = register_form.cleaned_data.get('manager')
-            staff = register_form.cleaned_data.get('staff')
             #hash passwd
             password = make_password(passwd)
             #check validate
@@ -323,23 +333,16 @@ def hr_register(request):
                 message = 'Same E-mail.'
                 return render(request, 'hr/register.html', locals())
             #insert
-            new_User = models.User()
-            new_User.name = name
             new_User.user_id = user_id
             new_User.passwd = password
             new_User.email = email
-            new_User.department = department
-            new_User.salary = salary
-            new_User.on_job = on_job
-            new_User.annual_left = 0
-            new_User.boss = boss
-            new_User.hr = hr
-            new_User.manager = manager
-            new_User.staff = staff
             #get level
-            new_User.labor = function.find_labor(salary)
-            new_User.health = function.find_health(salary)
-            new_User.retirement = function.find_retirement(salary)
+            new_User.labor = function.find_labor(new_User.salary)
+            new_User.health = function.find_health(new_User.salary)
+            new_User.retirement = function.find_retirement(new_User.salary)
+            new_User.retire_self = function.retire_M(new_User.retirement)*new_User.self_percent/100
+            new_User.annual = function.get_annual(new_User.on_job.year, new_User.on_job.month, new_User.on_job.day)
+            new_User.annual_left = new_User.annual - 0
             new_User.save()
             #redirect
             return redirect('/hr/menu/')

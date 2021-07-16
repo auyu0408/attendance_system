@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import date, datetime
+from django.db.models import base
 from django.db.models.deletion import CASCADE
 from django.utils import timezone
 import time
@@ -22,7 +23,8 @@ class User(models.Model):
     health = models.PositiveSmallIntegerField(default=1)
     family = models.PositiveSmallIntegerField(default=0)
     retirement = models.PositiveSmallIntegerField(default=1)
-    retire_self =models.PositiveSmallIntegerField(default=0)
+    self_percent =models.PositiveSmallIntegerField(default=0)
+    retire_self = models.PositiveSmallIntegerField(default=0)
     ##identity check
     boss = models.BooleanField(default=False)
     manager = models.BooleanField(default=False)
@@ -83,6 +85,8 @@ class Daily(models.Model):
     off_time = models.TimeField(auto_now=False, auto_now_add=False, default=timezone.now)
     on_time_fixed = models.TimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     off_time_fixed = models.TimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
+    halfway = models.PositiveSmallIntegerField(default=0)
+    leave_early = models.PositiveSmallIntegerField(default=0)
     fixed_note = models.CharField(max_length=256, blank=True, null=True)
     #Meta
     class Meta:
