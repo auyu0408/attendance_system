@@ -1,4 +1,4 @@
-from datetime import date
+# -*- coding: UTF-8 -*-
 import datetime
 stander=[[0, 24000, 25200, 26400, 27600, 28800, 30300, 31800, 33300, 34800, 36300, 38200, 40100, 42000, 43900, 45800, 48200, 50600, 53000, 55400, 57800, 60800, 63800, 66800, 69800, 72800, 76500, 80200, 83900, 87600, 92100, 96600, 101100, 105600, 110100, 115500, 120900, 126300, 131700, 137100, 142500, 147900, 150000, 156400, 162800, 169200, 175600, 182000],
         [ 0, 552,   579,   607,   635,   663,   697,   732,   766,   801,   835,   878,   922,   966,   1010,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054],
@@ -74,13 +74,76 @@ def get_annual(year,month,day):
             annual = 30
     return annual
 
-def get_day(start_time, end_time):
-    return
+def get_day(sy,sb,sd,sh,sm,ey,eb,ed,eh,em):
+    if sh == 12:
+        sh = 13
+        sm = 0
+    if eh == 12:
+        em = 0
+    day1 = datetime.datetime(ey,eb,ed,eh,em,0)-datetime.datetime(sy,sb,sd,sh,sm,0)
+    hour = day1.seconds/60/60
+    minute = (day1.seconds-hour*3600)/60
+    if minute > 30:
+        hour = hour + 1
+    elif minute > 0:
+        hour = hour + 0.5
+    else:
+        hour = hour
+    if sh <12 and eh >12:
+        hour = hour - 1
+    day = day1.days + round(float(hour)/float(8),2)
+    return day
 
-def get_hour():
-    return
+def get_hour(sy,sb,sd,sh,sm,ey,eb,ed,eh,em):
+    if sh == 12:
+        sh = 13
+        sm = 0
+    if eh == 12:
+        em = 0
+    day1 = datetime.datetime(ey,eb,ed,eh,em,0)-datetime.datetime(sy,sb,sd,sh,sm,0)
+    hour1 = day1.seconds/60/60
+    minute = (day1.seconds-hour1*3600)/60
+    if minute > 30:
+        hour1 = hour1 + 1
+    elif minute > 0:
+        hour1 = hour1 + 0.5
+    else:
+        hour1 = hour1
+    if sh <12 and eh >12:
+        hour1 = hour1 - 1
+    hour = hour1 + day1.days*8
+    return hour
+
+def get_minute(sy,sb,sd,sh,sm,ey,eb,ed,eh,em):
+    day1 = datetime.datetime(ey,eb,ed,eh,em,0)-datetime.datetime(sy,sb,sd,sh,sm,0)
+    minute = (day1.seconds)/60
+    return minute
+
+def get_weekend(sy,sb,sd,sh,sm,ey,eb,ed,eh,em):
+    if sh == 12:
+        sh = 13
+        sm = 0
+    if eh == 12:
+        em = 0
+    day1 = datetime.datetime(ey,eb,ed,eh,em,0)-datetime.datetime(sy,sb,sd,sh,sm,0)
+    minute = (day1.seconds)/60
+    if sh <12 and eh >12:
+        minute = minute - 60
+    return minute
+
+def get_rate(catogory, others):
+    if catogory == "SICK" or (catogory == 'OTHERS' and others in'因公隔離'):
+        rate = 0.5
+    elif catogory == "MARRIAGE" or catogory=="FUNERAL" or catogory=="ANNUAL" or catogory=="OFFICIAL" or catogory=="INJURY":
+        rate = 0
+    elif catogory == "PERSONAL" or (catogory == "OTHERS"):
+        rate = 1
+    else:
+        rate = 1
+    return rate
 
 #test case
 #print (find_labor(80000), find_health(80000), find_retirement(80000))
 #print (convert_labor(find_labor(80000)), convert_health(find_health(80000)), convert_retirement(find_retirement(80000)))
 #print (get_annual(1997,7,17))
+#print(get_minute(2021,7,17,8,00,2021,7,17,13,20))

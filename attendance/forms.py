@@ -31,6 +31,7 @@ class LeaveForm(forms.Form):
         ('MENSTRUAL', '生理假'),
         ('MATERNITY', '產前假'),
         ('PATERNITY', '陪產假'),
+        ('INJURY', '職災病假'),
         ('OTHER', '其他'),
     )
 

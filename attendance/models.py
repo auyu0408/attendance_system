@@ -47,13 +47,15 @@ class Leave(models.Model):
         MENSTRUAL = '生理假'
         MATERNITY = '產前假'
         PATERNITY = '陪產假'
+        INJURY = '職災病假'
         OTHER = '其他'
 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     start_time = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now)
     end_time = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now)
-    total_time = models.PositiveSmallIntegerField(default=0, help_text='in hours')
-    total = models.PositiveSmallIntegerField(default=0, help_text='in days')
+    total_time = models.FloatField(default=0, help_text='in hours')
+    total = models.FloatField(default=0, help_text='in days')
+    rate = models.FloatField(default=1)#要扣的部份，0表示不用扣
     category = models.CharField(max_length=64, choices=Reason.choices, default=Reason.ANNUAL)
     other_reason = models.CharField(max_length=128, blank=True, null=True, help_text='fill in when above is other' )#used when category=other
     special = models.TextField(blank=True, null=True)

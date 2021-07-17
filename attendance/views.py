@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from django.core.checks import messages
 from django.http import request
 from django.http.response import HttpResponse
@@ -91,12 +92,21 @@ def leave(request,id=0):
         leave_form = forms.LeaveForm(request.POST)
         message = "please check the input type"
         if leave_form.is_valid():
-            leave.start_time = leave_form.cleaned_data.get('start_time')
-            leave.end_time = leave_form.cleaned_data.get('end_time')
+            s = leave_form.cleaned_data.get('start_time')
+            e = leave_form.cleaned_data.get('end_time')
+            leave.start_time = s
+            leave.end_time = e
             leave.category = leave_form.cleaned_data.get('category')
             leave.other_reason = leave_form.cleaned_data.get('other_reason')
             leave.special = leave_form.cleaned_data.get('special')
             leave.checked = False
+            if leave.other_reason != "因公隔離" and leave.other_reason != "防疫照顧假" and leave.other_reason != "防疫隔離假" and leave.other_reason != "疫苗給薪假" and leave.other_reason != "":
+                message = "Wrong reason type."
+                return render(request, 'login/leave.html', {'message': message})
+            #get total time
+            leave.total_time = function.get_hour(s.year, s.month, s.day, s.hour, s.minute, e.year, e.month, e.day, e.hour, e.minute)
+            leave.total = function.get_day(s.year, s.month, s.day, s.hour, s.minute, e.year, e.month, e.day, e.hour, e.minute)
+            leave.rate = function.get_rate(leave.category, leave.other_reason)
             #get user
             if id==0:
                 leave.user_id = models.User.objects.get(id=request.session['user_id'])
@@ -148,16 +158,34 @@ def overtime(request, id=0):
         overtime_form = forms.OvertimeForm(request.POST)
         message = "please check the input type"
         if overtime_form.is_valid():
+            s = overtime_form.cleaned_data.get('start_time')
+            e = overtime_form.cleaned_data.get('end_time')
             overtime.start_time = overtime_form.cleaned_data.get('start_time')
             overtime.end_time = overtime_form.cleaned_data.get('end_time')
             overtime.reason = overtime_form.cleaned_data.get('reason')
+        # get time
+        if overtime.start_time.isoweekday() == 7:
+            overtime.double = function.get_sunday(s.year, s.month, s.day, s.hour, s.minute, e.year, e.month, e.day, e.hour, e.minute)
+            overtime.one_third = 0
+            overtime.two_third = 0
+        else:
+            total_minute = function.get_minute(s.year, s.month, s.day, s.hour, s.minute, e.year, e.month, e.day, e.hour, e.minute)
+            if total_minute < 120:
+                overtime.one_third = total_minute
+                overtime.two_third = 0
+                overtime.double = 0
+            elif total_minute < 480:
+                overtime.one_third = 120
+                overtime.two_third = total_minute-120
+                overtime.double = 0
+            else:
+                overtime.one_third = 120
+                overtime.two_third = 360
+                overtime.double = total_minute - 480
         #get user
         if id==0:
             overtime.user_id = models.User.objects.get(id=request.session['user_id'])
         #insert
-        overtime.one_third = 0
-        overtime.two_third = 0
-        overtime.double = 0
         overtime.checked = False
         overtime.save()
         message = "申請成功"
