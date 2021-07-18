@@ -1,0 +1,60 @@
+{%include "../templates.html"%}
+<body>
+    <div class="container">
+        <div class="col">
+            <form class="form-register" action="/attendance/{{id}}/" method="post">
+                {% if message %}
+                    <div class="alert alert-danger">{{ message }}</div>
+                {% endif %}
+                {% csrf_token %}
+                <h3 class="text-center"><br>出勤單</h3>
+                <p>時間可自行微調</p>
+                <div class="form-group">
+                    {{daily_form.name.label_tag}}
+                    {{daily_form.name}}
+                </div>
+                <div class="form-group">
+                    {{daily_form.date.label_tag}}
+                    {{daily_form.date}}
+                </div>
+                <div class="form-group">
+                    {{daily_form.on_time.label_tag}}
+                    {{daily_form.on_time}}
+                </div>
+                <div class="form-group">
+                    {{daily_form.off_time.label_tag}}
+                    {{daily_form.off_time}}
+                </div>
+                <div class="form-group">
+                    {{daily_form.on_time_fixed.label_tag}}
+                    {{daily_form.on_time_fixed}}
+                </div>
+                <div class="form-group">
+                    {{daily_form.off_time_fixed.label_tag}}
+                    {{daily_form.off_time_fixed}}
+                </div>
+                <div class="form-group">
+                    {{daily_form.fixed_note.label_tag}}
+                    {{daily_form.fixed_note}}
+                </div>
+                <a href="/attendance/" class="btn btn-info">回列表</a>
+                <div>
+                    <br>
+                    <button type="submit" class="btn btn-warning">提交</button> 
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        $(function () {
+            $("#id_on_time").datetimepicker( {
+                format:'H:i:00',});
+            $("#id_off_time").datetimepicker( {
+                format:'H:i:00',});
+            $("#id_on_time_fixed").datetimepicker( {
+                format:'H:i',});
+            $("#id_off_time_fixed").datetimepicker( {
+                format:'H:i',});
+            });
+    </script>
+</body>

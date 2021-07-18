@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+from datetime import date, datetime
 from django.core.checks import messages
 from django.http import request
 from django.http.response import HttpResponse
@@ -7,6 +8,7 @@ from . import models
 from . import forms
 from django.contrib.auth.hashers import check_password, make_password
 from . import function
+from django.utils import timezone
 
 # Create your views here.
 def index(request):
@@ -78,8 +80,49 @@ def change_passwd(request):
 def attendance(request):
     if not request.session.get('is_login', None):
         return redirect("/login/")
-    return render(request, 'login/attendance.html')
+    dailys = models.Daily.objects.filter(user_id=request.session['user_id'])
+    back = "/index/"
+    return render(request, 'login/attendance.html', locals())
 
+def daily(request, id=0):
+    if not request.session.get('is_login', None):
+        return redirect("/login/")
+    if id!=0:
+        daily = models.Daily.objects.get(id=id)
+    else:
+        daily = models.Daily()
+    if request.method == 'POST':
+        daily_form = forms.DailyForm(request.POST)
+        if daily_form.is_valid():
+            daily.on_time = daily_form.cleaned_data.get('on_time')
+            daily.off_time = daily_form.cleaned_data.get('off_time')
+            daily.on_time_fixed = daily_form.cleaned_data.get('on_time_fixed')
+            daily.off_time_fixed = daily_form.cleaned_data.get('off_time_fixed')
+            daily.fixed_note = daily_form.cleaned_data.get('fixed_note')
+            daily.date = daily_form.cleaned_data.get('date')
+            user_name = daily_form.cleaned_data.get('name')
+            try:
+                user = models.User.objects.get(name=user_name)
+            except:
+                message = "Wrong Name!"
+                return render(request, "hr/edit_daily.html", locals())
+            user_id = user
+            print("hi")
+            daily.save()
+            message = "修改成功"
+            return render(request, "login/index.html", {'message':message})
+        else:
+            message = "Wrong type."
+            return render(request, "hr/edit_daily.html", locals())
+    else:
+        if id!=0:
+            daily_form = forms.DailyForm(initial={'name':daily.user_id.name, 'on_time':daily.on_time, 'off_time':daily.off_time,
+                                        'on_time_fixed':daily.on_time_fixed, 'off_time_fixed':daily.off_time_fixed,
+                                        'date':daily.date, 'fixed_note':daily.fixed_note,})
+            return render(request, "hr/edit_daily.html", locals())
+        else:
+            daily_form = forms.DailyForm()
+            return render(request, "hr/edit_daily.html", locals())
 
 def leave(request,id=0):
     if not request.session.get('is_login', None):
@@ -102,7 +145,8 @@ def leave(request,id=0):
             leave.checked = False
             if leave.other_reason != "因公隔離" and leave.other_reason != "防疫照顧假" and leave.other_reason != "防疫隔離假" and leave.other_reason != "疫苗給薪假" and leave.other_reason != "":
                 message = "Wrong reason type."
-                return render(request, 'login/leave.html', {'message': message})
+                
+                return render(request, 'login/leave.html', locals())
             #get total time
             leave.total_time = function.get_hour(s.year, s.month, s.day, s.hour, s.minute, e.year, e.month, e.day, e.hour, e.minute)
             leave.total = function.get_day(s.year, s.month, s.day, s.hour, s.minute, e.year, e.month, e.day, e.hour, e.minute)
@@ -165,7 +209,7 @@ def overtime(request, id=0):
             overtime.reason = overtime_form.cleaned_data.get('reason')
         # get time
         if overtime.start_time.isoweekday() == 7:
-            overtime.double = function.get_sunday(s.year, s.month, s.day, s.hour, s.minute, e.year, e.month, e.day, e.hour, e.minute)
+            overtime.double = function.get_minute(s.year, s.month, s.day, s.hour, s.minute, e.year, e.month, e.day, e.hour, e.minute)
             overtime.one_third = 0
             overtime.two_third = 0
         else:
@@ -383,10 +427,20 @@ def hr_register(request):
     return render(request, 'hr/register.html', locals()) 
 
 
-def hr_attendance(request):
+def hr_attendance(request, id=0):
     if not request.session.get('is_hr', None):
         return redirect("/index/")
-    return render(request, 'hr/attendance.html')
+    if id==0:
+        mode = "user"
+        title = "請選擇員工"
+        href = "/hr/attendance"
+        back = "/hr/menu/"
+        objects = models.User.objects.all()
+        return render(request, 'hr/list.html', locals())
+    else:
+        dailys = models.Daily.objects.filter(user_id__id=id)
+        back = "/hr/menu/"
+        return render(request, 'login/attendance.html', locals())
 
 def hr_leave(request, id=0):
     if not request.session.get('is_hr', None):
@@ -493,11 +547,31 @@ def check_in_out(request):
         return redirect("/index/")
     message = ""
     if request.method == "POST":
+        now = timezone.now()
         user_id = request.POST.get('user_id')
         try:
             user = models.User.objects.get(user_id=user_id)
         except:
             message = "Wrong ID."
             return render(request, 'hr/check_in_out.html', {'message': message})
+        try:
+            daily = models.Daily.objects.get(user_id__id=user.id, date=date.today())
+        except models.Daily.DoesNotExist:
+            daily = None
+        if daily == None:
+            daily = models.Daily()
+            daily.on_time = now
+            daily.user_id = user
+            daily.date = date.today()
+            daily.on_time_fixed = now
+        daily.off_time = now
+        daily.off_time_fixed = now
+        daily.halfway = 0
+        daily.leave_early = 0
+        daily.fixed_note=""
+        daily.save()
+        #else:
+        #    daily.off_time = now
+        #    daily.save()
         message = f"{user.name}簽到成功"
     return render(request, 'hr/check_in_out.html', {'message': message})

@@ -1,3 +1,4 @@
+from attendance.views import overtime
 from django.db import models
 from datetime import date, datetime
 from django.db.models import base
@@ -87,8 +88,13 @@ class Daily(models.Model):
     off_time = models.TimeField(auto_now=False, auto_now_add=False, default=timezone.now)
     on_time_fixed = models.TimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     off_time_fixed = models.TimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
-    halfway = models.PositiveSmallIntegerField(default=0)
+    attend = models.PositiveSmallIntegerField(default=0)
+    overtime = models.PositiveSmallIntegerField(default=0)
     leave_early = models.PositiveSmallIntegerField(default=0)
+    attend_fixed = models.PositiveSmallIntegerField(default=0)
+    overtime_fixed = models.PositiveSmallIntegerField(default=0)
+    leave_early_fixed = models.PositiveSmallIntegerField(default=0)
+    holiday = models.PositiveSmallIntegerField(default=0)
     fixed_note = models.CharField(max_length=256, blank=True, null=True)
     #Meta
     class Meta:

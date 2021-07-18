@@ -1,0 +1,59 @@
+{%include "../templates.html"%}
+<body>
+    <div class="container">
+        <div class="col">
+            <h4 class="text-center"><br>出勤管理</h4>
+            <div class="table">
+                <br>
+                <a href="{{back}}" class="btn btn-info">回前頁</a>
+                {% if back == "/hr/menu/" %}
+                    <a href="/daily/" class="btn btn-warning">新增出勤</a>
+                {% endif %}
+            </div>
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th colspan="6" class="text-center">原始出勤資料</th>
+                        <th colspan="5" class="text-center">實際出勤資料</th>
+                        <th rowspan="2" class="text-center">請假時數</th>
+                        <th rowspan="2" class="text-center">備註</th>
+                        <th rowspan="2"></th>
+                    </tr>
+                    <tr>
+                        <th scope="col">Day</th>
+                        <th scope="col">上班</th>
+                        <th scope="col">下班</th>
+                        <th scope="col">白天出勤</th>
+                        <th scope="col">遲到早退</th>
+                        <th scope="col">延時加班</th>
+                        <th scope="col">實際上班</th>
+                        <th scope="col">實際下班</th>
+                        <th scope="col">實際出勤</th>
+                        <th scope="col">遲到早退</th>
+                        <th scope="col">實際加班</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for daily in dailys %}
+                    <tr>
+                        <td scope="col">{{daily.date.month}}/{{daily.date.day}}</td>
+                        <td scope="col">{{daily.on_time.hour}}:{% if daily.on_time.minute < 10 %}0{% endif %}{{daily.on_time.minute}}</td>
+                        <td scope="col">{{daily.off_time.hour}}:{% if daily.off_time.minute < 10 %}0{% endif %}{{daily.off_time.minute}}</td>
+                        <td scope="col">{{daily.attend}}分</td>
+                        <td scope="col">{{daily.leave_early}}分</td>
+                        <td scope="col">{{daily.overtime}}分</td>
+                        <td scope="col">{{daily.on_time_fixed.hour}}:{% if daily.on_time_fixed.minute < 10 %}0{% endif %}{{daily.on_time_fixed.minute}}</td>
+                        <td scope="col">{{daily.off_time_fixed.hour}}:{% if daily.off_time_fixed.minute < 10 %}0{% endif %}{{daily.off_time_fixed.minute}}</td>
+                        <td scope="col">{{daily.attend_fixed}}分</td>
+                        <td scope="col">{{daily.leave_early_fixed}}分</td>
+                        <td scope="col">{{daily.overtime}}分</td>
+                        <td scope="col">{{daily.holiday}}時</td>
+                        <td scope="col">{{daily.fixed_note}}</td>
+                        <td scope="col"><a href="/attendance/{{daily.id}}/" class="btn btn-sm btn-info">修改</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>

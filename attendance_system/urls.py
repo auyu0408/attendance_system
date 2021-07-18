@@ -24,7 +24,12 @@ urlpatterns = [
     path('login/', views.login),
     path('profile/', views.profile),
     path('change_passwd/', views.change_passwd),
+
     path('attendance/', views.attendance),
+    path('attendance/<int:id>/', views.daily),
+
+    path('daily/', views.daily),
+    path('daily/<int:id>/', views.daily),
 
     path('leave_list/', views.leave_list),
     path('leave/', views.leave),
@@ -48,6 +53,7 @@ urlpatterns = [
         path('edit/<int:id>/', views.hr_edit),
         path('register/', views.hr_register),
         path('attendance/', views.hr_attendance),
+        path('attendance/<int:id>/', views.hr_attendance),
 
         path('leave/', views.hr_leave),
         path('leave/<int:id>/', views.hr_leave),

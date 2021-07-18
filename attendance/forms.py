@@ -1,7 +1,7 @@
 from django import forms
 from datetime import date
 
-from django.forms.widgets import CheckboxInput
+from django.forms.widgets import CheckboxInput, TimeInput
 
 class SignUp(forms.Form):
     
@@ -49,3 +49,12 @@ class OvertimeForm(forms.Form):
 class Passwd(forms.Form):
     origin = forms.CharField(label="原密碼", widget=forms.PasswordInput(attrs={'class':'form-control', 'autofocus':''}))
     new = forms.CharField(label="新密碼", widget=forms.PasswordInput(attrs={'class':'form-control'}))
+
+class DailyForm(forms.Form):
+    name = forms.CharField(label="Name", widget=forms.TextInput(attrs={'class':'form-control', 'autofocus':''}))
+    on_time = forms.TimeField(label="上班時間", widget=forms.TimeInput(attrs={'class':'form-control'}))
+    off_time = forms.TimeField(label="下班時間", widget=forms.TimeInput(attrs={'class':'form-control'}))
+    on_time_fixed = forms.TimeField(label="上班時間(實際)", widget=forms.TimeInput(attrs={'class':'form-control'}), required=False)
+    off_time_fixed = forms.TimeField(label="下班時間(實際)",widget=forms.TimeInput(attrs={'class':'form-control'}), required=False)
+    fixed_note = forms.CharField(label="備註", widget=forms.TextInput(attrs={'class':'form-control'}), required=False)
+    date = forms.DateField(label="Day", widget=forms.DateInput(attrs={'class':'form-control'}))
