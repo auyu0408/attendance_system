@@ -52,8 +52,10 @@ class Leave(models.Model):
         OTHER = '其他'
 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    start_time = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now)
-    end_time = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now)
+    year = models.PositiveSmallIntegerField(default=0)
+    month = models.PositiveSmallIntegerField(default=0)
+    start = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now)
+    end = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now)
     total_time = models.FloatField(default=0, help_text='in hours')
     total = models.FloatField(default=0, help_text='in days')
     rate = models.FloatField(default=1)#要扣的部份，0表示不用扣
@@ -63,13 +65,16 @@ class Leave(models.Model):
     checked = models.BooleanField(default=False)
     #Meta
     class Meta:
-        ordering = ['-start_time']
+        ordering = ['-start']
     #Methods
 
 class Overtime(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    start_time = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now)
-    end_time = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now)
+    year = models.PositiveSmallIntegerField(default=0)
+    month = models.PositiveSmallIntegerField(default=0)
+    day = models.PositiveSmallIntegerField(default=0)
+    start = models.TimeField(auto_now=False, auto_now_add=False, default=timezone.now)
+    end = models.TimeField(auto_now=False, auto_now_add=False, default=timezone.now)
     one_third = models.PositiveSmallIntegerField(default=0, help_text='in hours')
     two_third = models.PositiveSmallIntegerField(default=0, help_text='in hours')
     double = models.PositiveSmallIntegerField(default=0, help_text='in hours')
@@ -77,28 +82,30 @@ class Overtime(models.Model):
     checked = models.BooleanField(default=False)
     #Meta
     class Meta:
-        ordering = ['-start_time']
+        ordering = ['-year', '-month', '-day']
     #Methods
 
 class Daily(models.Model):
     #Field
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateField(default=date.today)
+    year = models.PositiveSmallIntegerField(default=0)
+    month = models.PositiveSmallIntegerField(default=0)
+    day = models.PositiveSmallIntegerField(default=0)
     on_time = models.TimeField(auto_now=False, auto_now_add=False, default=timezone.now)
     off_time = models.TimeField(auto_now=False, auto_now_add=False, default=timezone.now)
     on_time_fixed = models.TimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     off_time_fixed = models.TimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
-    attend = models.PositiveSmallIntegerField(default=0)
+    attend = models.FloatField(default=0)
     overtime = models.PositiveSmallIntegerField(default=0)
     leave_early = models.PositiveSmallIntegerField(default=0)
-    attend_fixed = models.PositiveSmallIntegerField(default=0)
+    attend_fixed = models.FloatField(default=0)
     overtime_fixed = models.PositiveSmallIntegerField(default=0)
     leave_early_fixed = models.PositiveSmallIntegerField(default=0)
     holiday = models.PositiveSmallIntegerField(default=0)
     fixed_note = models.CharField(max_length=256, blank=True, null=True)
     #Meta
     class Meta:
-        ordering = ['date']
+        ordering = ['-year', '-month', '-day']
     #Method
 
 class Total(models.Model):
@@ -109,10 +116,12 @@ class Total(models.Model):
     #delaytime = models.PositiveIntegerField(default=0)#hours
     over_13 = models.PositiveSmallIntegerField(default=0)
     over_23 = models.PositiveSmallIntegerField(default=0)
+    over_223 = models.PositiveSmallIntegerField(default=0)
     over_2  = models.PositiveSmallIntegerField(default=0)
     leave_00 = models.PositiveIntegerField(default=0)#no salary hours
     leave_01 = models.PositiveIntegerField(default=0)#half salary
     leave_10 = models.PositiveIntegerField(default=0)#full salary
+    leave_early = models.PositiveIntegerField(default=0)
     actual_salary = models.PositiveIntegerField(default=0)
     #Meta
     class Meta:

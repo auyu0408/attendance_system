@@ -8,10 +8,9 @@
                     <td>姓名:</td><td>{{leave.user_id.name}}</td>
                 </tr>
                 <tr>
-                    <td>開始時間:</td><td>{{leave.start_time}}</td>
-                </tr>
-                <tr>
-                    <td>結束時間:</td><td>{{leave.end_time}}</td>
+                    <td>時間:</td>
+                    <td>{{leave.year}}, {{leave.month}}/{{leave.start.day}} {{leave.start.hour}}:{% if leave.start.minute < 10 %}0{% endif %}{{leave.start.minute}}
+                        ~{{leave.month}}/{{leave.end.day}} {{leave.end.hour}}:{% if leave.end.minute < 10 %}0{% endif %}{{leave.end.minute}}</td>
                 </tr>
                 <tr>
                     <td>總計:</td><td>{{leave.total_time}}時 ({{leave.total}}日)</td>

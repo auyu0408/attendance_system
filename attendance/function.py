@@ -101,14 +101,8 @@ def get_hour(sy,sb,sd,sh,sm,ey,eb,ed,eh,em):
     if eh == 12:
         em = 0
     day1 = datetime.datetime(ey,eb,ed,eh,em,0)-datetime.datetime(sy,sb,sd,sh,sm,0)
-    hour1 = day1.seconds/60/60
+    hour1 = round(float(day1.seconds)/3600,2)
     minute = (day1.seconds-hour1*3600)/60
-    if minute > 30:
-        hour1 = hour1 + 1
-    elif minute > 0:
-        hour1 = hour1 + 0.5
-    else:
-        hour1 = hour1
     if sh <12 and eh >12:
         hour1 = hour1 - 1
     hour = hour1 + day1.days*8
@@ -146,4 +140,5 @@ def get_rate(catogory, others):
 #print (find_labor(80000), find_health(80000), find_retirement(80000))
 #print (convert_labor(find_labor(80000)), convert_health(find_health(80000)), convert_retirement(find_retirement(80000)))
 #print (get_annual(1997,7,17))
-#print(get_minute(2021,7,17,8,00,2021,7,17,13,20))
+#print(get_hour(2021,7,17,8,11,2021,7,17,17,00))
+#print(int(4.83))

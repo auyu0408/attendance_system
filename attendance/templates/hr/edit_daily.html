@@ -8,14 +8,17 @@
                 {% endif %}
                 {% csrf_token %}
                 <h3 class="text-center"><br>出勤單</h3>
-                <p>時間可自行微調</p>
                 <div class="form-group">
                     {{daily_form.name.label_tag}}
                     {{daily_form.name}}
                 </div>
                 <div class="form-group">
-                    {{daily_form.date.label_tag}}
-                    {{daily_form.date}}
+                    {{daily_form.year.label_tag}}
+                    {{daily_form.year}}
+                    {{daily_form.month.label_tag}}
+                    {{daily_form.month}}
+                    {{daily_form.day.label_tag}}
+                    {{daily_form.day}}
                 </div>
                 <div class="form-group">
                     {{daily_form.on_time.label_tag}}

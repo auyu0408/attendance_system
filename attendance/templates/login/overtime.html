@@ -9,13 +9,27 @@
                 {% csrf_token %}
                 <h3 class="text-center"><br>加班申請</h3>
                 <p>時間可自行微調</p>
-                <div class="form-group">
-                    {{overtime_form.start_time.label_tag}}
-                    {{overtime_form.start_time}}
+                <div class="row">
+                    <div class="form-group col-4">
+                        {{overtime_form.year.label}}
+                        {{overtime_form.year}}
+                    </div>
+                    <div class="form-group col-4">
+                        {{overtime_form.month.label}}
+                        {{overtime_form.month}}
+                    </div>
+                    <div class="form-group col-4">
+                        {{overtime_form.day.label}}
+                        {{overtime_form.day}}
+                    </div>
                 </div>
                 <div class="form-group">
-                    {{overtime_form.end_time.label_tag}}
-                    {{overtime_form.end_time}}
+                    {{overtime_form.start.label_tag}}
+                    {{overtime_form.start}}
+                </div>
+                <div class="form-group">
+                    {{overtime_form.end.label_tag}}
+                    {{overtime_form.end}}
                 </div>
                 <div class="form-group">
                     {{overtime_form.reason.label_tag}}
@@ -31,10 +45,10 @@
     </div>
     <script>
         $(function () {
-            $("#id_start_time").datetimepicker( {
-                format:'Y-m-d H:i:00',});
-            $("#id_end_time").datetimepicker( {
-                format:'Y-m-d H:i:00',});
+            $("#id_start").datetimepicker( {
+                format:'H:i',});
+            $("#id_end").datetimepicker( {
+                format:'H:i',});
             });
     </script>
 </body>

@@ -10,7 +10,10 @@
                     {{object.department}}-{{object.name}}
                     {% endif %}
                     {% if mode == "leave" %}
-                    {{object.start_time}}-{{object.category}}
+                    {{object.start}}-{{object.category}}
+                    {% endif %}
+                    {% if mode == "overtime" %}
+                    {{object.date}}-{{object.reason}}
                     {% endif %}
                 </a> 
                 {% endfor %}

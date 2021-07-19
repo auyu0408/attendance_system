@@ -9,13 +9,27 @@
                 {% csrf_token %}
                 <h3 class="text-center"><br>假單申請</h3>
                 <p>時間可自行微調</p>
-                <div class="form-group">
-                    {{leave_form.start_time.label_tag}}
-                    {{leave_form.start_time}}
+                <div class="row">
+                    <div class="form-group col-4">
+                        {{leave_form.year.label}}
+                        {{leave_form.year}}
+                    </div>
+                    <div class="form-group col-4">
+                        {{leave_form.month.label}}
+                        {{leave_form.month}}
+                    </div>
+                    <div class="form-group col-4">
+                        {{leave_form.day.label}}
+                        {{leave_form.day}}
+                    </div>
                 </div>
                 <div class="form-group">
-                    {{leave_form.end_time.label_tag}}
-                    {{leave_form.end_time}}
+                    {{leave_form.start.label_tag}}
+                    {{leave_form.start}}
+                </div>
+                <div class="form-group">
+                    {{leave_form.end.label_tag}}
+                    {{leave_form.end}}
                 </div>
                 <div class="form-group">
                     {{leave_form.category.label_tag}}
@@ -39,9 +53,9 @@
     </div>
     <script>
         $(function () {
-            $("#id_start_time").datetimepicker( {
+            $("#id_start").datetimepicker( {
                 format:'Y-m-d H:i:00',});
-            $("#id_end_time").datetimepicker( {
+            $("#id_end").datetimepicker( {
                 format:'Y-m-d H:i:00',});
             });
     </script>

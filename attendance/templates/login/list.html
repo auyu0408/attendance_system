@@ -7,17 +7,32 @@
                 <a href={{href}} class="btn btn-warning">{{apply}}</a>
             </div>
             <h4 class="text-center"><br>{{unchecked}}</h4>
+            {% if title == "leave" %}
             <ul class="list-group list">
                 {% for n_check in n_checks %}
-                <a href ="/display_{{title}}/{{n_check.id}}/" class="list-group-item list-group-item-light list-group-item-action">請假日:{{n_check.start_time.month}}/{{n_check.start_time.day}}</a> 
+                <a href ="/display_{{title}}/{{n_check.id}}/" class="list-group-item list-group-item-light list-group-item-action">請假日:{{n_check.start.month}}/{{n_check.start.day}}</a> 
                 {% endfor %}
             </ul>
             <h4 class="text-center"><br>{{checked}}</h4>
             <ul class="list-group list">
                 {% for check in checks %}
-                <a href ="/display_{{title}}/{{check.id}}/" class="list-group-item list-group-item-light list-group-item-action">請假日:{{check.start_time.month}}/{{check.start_time.day}}</a> 
+                <a href ="/display_{{title}}/{{check.id}}/" class="list-group-item list-group-item-light list-group-item-action">請假日:{{check.start.month}}/{{check.start.day}}</a> 
                 {% endfor %}
             </ul>
+            {% endif %}
+            {% if title == "overtime" %}
+            <ul class="list-group list">
+                {% for n_check in n_checks %}
+                <a href ="/display_{{title}}/{{n_check.id}}/" class="list-group-item list-group-item-light list-group-item-action">請假日:{{n_check.month}}/{{n_check.day}}</a> 
+                {% endfor %}
+            </ul>
+            <h4 class="text-center"><br>{{checked}}</h4>
+            <ul class="list-group list">
+                {% for check in checks %}
+                <a href ="/display_{{title}}/{{check.id}}/" class="list-group-item list-group-item-light list-group-item-action">請假日:{{check.month}}/{{check.day}}</a> 
+                {% endfor %}
+            </ul>
+            {% endif %}
             <div class="list">
                 <br>
                 <a href="/index/" class="btn btn-info">回前頁</a>

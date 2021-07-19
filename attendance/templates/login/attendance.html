@@ -36,17 +36,17 @@
                 <tbody>
                     {% for daily in dailys %}
                     <tr>
-                        <td scope="col">{{daily.date.month}}/{{daily.date.day}}</td>
+                        <td scope="col">{{daily.month}}/{{daily.day}}</td>
                         <td scope="col">{{daily.on_time.hour}}:{% if daily.on_time.minute < 10 %}0{% endif %}{{daily.on_time.minute}}</td>
                         <td scope="col">{{daily.off_time.hour}}:{% if daily.off_time.minute < 10 %}0{% endif %}{{daily.off_time.minute}}</td>
-                        <td scope="col">{{daily.attend}}分</td>
+                        <td scope="col">{{daily.attend}}時</td>
                         <td scope="col">{{daily.leave_early}}分</td>
                         <td scope="col">{{daily.overtime}}分</td>
                         <td scope="col">{{daily.on_time_fixed.hour}}:{% if daily.on_time_fixed.minute < 10 %}0{% endif %}{{daily.on_time_fixed.minute}}</td>
                         <td scope="col">{{daily.off_time_fixed.hour}}:{% if daily.off_time_fixed.minute < 10 %}0{% endif %}{{daily.off_time_fixed.minute}}</td>
-                        <td scope="col">{{daily.attend_fixed}}分</td>
+                        <td scope="col">{{daily.attend_fixed}}時</td>
                         <td scope="col">{{daily.leave_early_fixed}}分</td>
-                        <td scope="col">{{daily.overtime}}分</td>
+                        <td scope="col">{{daily.overtime_fixed}}分</td>
                         <td scope="col">{{daily.holiday}}時</td>
                         <td scope="col">{{daily.fixed_note}}</td>
                         <td scope="col"><a href="/attendance/{{daily.id}}/" class="btn btn-sm btn-info">修改</a></td>

@@ -64,7 +64,6 @@ urlpatterns = [
         path('salary/', views.hr_salary),
         path('salary_pass/', views.salary_pass),
         path('change_passwd/', views.hr_passwd),
-        path('bonus/', views.hr_bonus),
     ])),
 
     path('check_in_out/', views.check_in_out),
