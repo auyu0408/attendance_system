@@ -1,0 +1,19 @@
+<div class="container">
+    <div class="col">
+        <form class="form-month" action="{{action}}" method="post">
+            {% csrf_token %}
+            <div class="row row-cols-auto align-items-center">
+            <h5 class="col-5">請輸入月份</h5>
+                <div class="form-group col-3 col-form-label col-form-label-sm">
+                    {{month_form.year}}
+                </div>
+                <div class="form-group col-2 col-form-label col-form-label-sm">
+                    {{month_form.month}}
+                </div>
+                <div class="form-group col-2">
+                    <button type="submit" class="btn btn-warning">{{submit}}</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

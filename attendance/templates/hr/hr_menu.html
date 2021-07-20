@@ -3,6 +3,9 @@
     <div class="container">
         <div class="col">
             <div class="d-grid gap-2 menu-group">
+                {% if message %}
+                    <div class="alert alert-secondary">{{ message }}</div>
+                {% endif %}
                 <h3 class="text-center">人事管理列表</h3>
                 <a href='/index/' class="btn btn-info">回功能列表</a>
                 <a href='/hr/profile/' class="btn btn-secondary">基本資料管理</a>
@@ -10,6 +13,7 @@
                 <a href='/hr/attendance/' class="btn btn-secondary">出勤管理</a>
                 <a href='/hr/leave/' class="btn btn-secondary">請假管理</a>
                 <a href='/hr/overtime/' class="btn btn-secondary">加班管理</a>
+                <a href='/hr/checked/' class="btn btn-secondary">假單和加班核對</a>
                 <a href='/hr/salary/' class="btn btn-secondary">薪資計算與調整</a>
                 <a href='/hr/change_passwd/' class="btn btn-secondary">更改薪資密碼</a>
                 <a href='/logout/' class="btn btn-danger">登出</a>

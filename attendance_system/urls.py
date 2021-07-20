@@ -62,6 +62,8 @@ urlpatterns = [
         path('overtime/<int:id>/', views.hr_overtime),
 
         path('salary/', views.hr_salary),
+        path('list_total/<int:userid>/',views.list_total),
+        path('show_total/<int:totalid>/',views.show_total),
         path('salary_pass/', views.salary_pass),
         path('change_passwd/', views.hr_passwd),
     ])),

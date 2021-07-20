@@ -30,7 +30,9 @@ def login(request):
             except:
                 message = 'Wrong ID!'
                 return render(request, 'login/login.html', {'message': message})
-
+            if user.status != 0:
+                message = '沒有資格'
+                return render(request, 'login/login.html', {'message':message})
             if  check_password(passwd, user.passwd):
                 request.session['is_login'] = True
                 request.session['user_id'] = user.id
@@ -80,8 +82,19 @@ def change_passwd(request):
 def attendance(request):
     if not request.session.get('is_login', None):
         return redirect("/login/")
-    dailys = models.Daily.objects.filter(user_id=request.session['user_id'])
+    month_form = forms.MonthForm()
+    year = datetime.datetime.today().year
+    mon = datetime.datetime.today().month
+    if request.method == "POST":
+        month_form = forms.MonthForm(request.POST)
+        if month_form.is_valid():
+            mon = month_form.cleaned_data.get('month')
+            year = month_form.cleaned_data.get('year')
+    dailys = models.Daily.objects.filter(user_id=request.session['user_id'], month=mon, year=year)
     back = "/index/"
+    action = "/attendance/"
+    submit = "送出"
+    title = f"{year}/{mon}出勤管理"
     return render(request, 'login/attendance.html', locals())
 
 def daily(request, id=0):
@@ -174,13 +187,8 @@ def leave(request,id=0):
             leave.start = s
             leave.end = e
             leave.category = leave_form.cleaned_data.get('category')
-            leave.other_reason = leave_form.cleaned_data.get('other_reason')
             leave.special = leave_form.cleaned_data.get('special')
             leave.checked = False
-            if leave.other_reason != "因公隔離" and leave.other_reason != "防疫照顧假" and leave.other_reason != "防疫隔離假" and leave.other_reason != "疫苗給薪假" and leave.other_reason != "":
-                message = "Wrong reason type."
-                
-                return render(request, 'login/leave.html', locals())
             #get total time
             leave.total_time = function.get_hour(s.year, s.month, s.day, s.hour, s.minute, e.year, e.month, e.day, e.hour, e.minute)
             if leave.total_time - int(leave.total_time) > 0.5:
@@ -190,7 +198,6 @@ def leave(request,id=0):
             else:
                 leave.total_time = int(leave.total_time) + 0.5
             leave.total = function.get_day(s.year, s.month, s.day, s.hour, s.minute, e.year, e.month, e.day, e.hour, e.minute)
-            leave.rate = function.get_rate(leave.category, leave.other_reason)
             #get user
             if id==0:
                 leave.user_id = models.User.objects.get(id=request.session['user_id'])
@@ -203,18 +210,29 @@ def leave(request,id=0):
         leave_form = forms.LeaveForm()
     else:
         leave_form = forms.LeaveForm(initial={'year':leave.year, 'month':leave.month, 'start':leave.start, 'end':leave.end,
-                                                'category':leave.category, 'other_reason':leave.other_reason,
-                                                'special':leave.special})
+                                                'category':leave.category, 'special':leave.special})
     return render(request, 'login/leave.html', locals())
 
 def leave_list(request):
-    checked = "已核准假單"
-    unchecked = "未核准假單"
-    checks = models.Leave.objects.filter(user_id=request.session['user_id'], checked=True)
-    n_checks = models.Leave.objects.filter(user_id=request.session['user_id'], checked=False)
+    if not request.session.get('is_login', None):
+        return redirect("/login/")
+    month_form = forms.MonthForm()
+    year = datetime.datetime.today().year
+    mon = datetime.datetime.today().month
+    if request.method == "POST":
+        month_form = forms.MonthForm(request.POST)
+        if month_form.is_valid():
+            year = month_form.cleaned_data.get('year')
+            mon = month_form.cleaned_data.get('month')
+    checked = f"{year}/{mon}已核准假單"
+    unchecked = f"{year}/{mon}未核准假單"
+    checks = models.Leave.objects.filter(user_id=request.session['user_id'], month=mon, year=year, checked=True)
+    n_checks = models.Leave.objects.filter(user_id=request.session['user_id'], month=mon, year=year, checked=False)
     apply = "請假申請"
     href = "/leave/"
     title = "leave"
+    action = "/leave_list/"
+    submit = "送出"
     return render(request, 'login/list.html', locals())
 
 def show_leave(request, id):
@@ -289,13 +307,24 @@ def overtime(request, id=0):
     return render(request, 'login/overtime.html', locals())
 
 def overtime_list(request):
-    checked = "已核准加班單"
-    unchecked = "未核准加班單"
-    checks = models.Overtime.objects.filter(user_id=request.session['user_id'], checked=True)
-    n_checks = models.Overtime.objects.filter(user_id=request.session['user_id'], checked=False)
+    if not request.session.get('is_login', None):
+        return redirect("/login/")
+    month_form = forms.MonthForm()
+    year = datetime.datetime.today().year
+    mon = datetime.datetime.today().month
+    if request.method == "POST":
+        month_form = forms.MonthForm(request.POST)
+        if month_form.is_valid():
+            year = month_form.cleaned_data.get('year')
+            mon = month_form.cleaned_data.get('month')
+    checked = f"{year}/{mon}已核准加班單"
+    unchecked = f"{year}/{mon}未核准加班單"
+    checks = models.Overtime.objects.filter(user_id=request.session['user_id'], month=mon, year=year, checked=True)
+    n_checks = models.Overtime.objects.filter(user_id=request.session['user_id'], month=mon, year=year, checked=False)
     apply = "加班申請"
     href = "/overtime/"
     title = "overtime"
+    submit = "送出"
     return render(request, 'login/list.html', locals())
 
 def show_overtime(request, id):
@@ -319,17 +348,27 @@ def check_list(request):
         message = "您沒有權限"
         return render(request, 'login/index.html', {'message':message})
     user = models.User.objects.get(id=request.session['user_id'])
+    month_form = forms.MonthForm()
+    year = datetime.datetime.today().year
+    mon = datetime.datetime.today().month
+    action = "/check_list/"
+    submit = "送出"
+    if request.method == "POST":
+        month_form = forms.MonthForm(request.POST)
+        if month_form.is_valid():
+            year = month_form.cleaned_data.get('year')
+            mon = month_form.cleaned_data.get('month')
     if user.boss:
-        n_leaves = models.Leave.objects.filter(user_id__manager=True, checked=False)
-        leaves = models.Leave.objects.filter(user_id__manager=True, checked=True)
-        n_overtimes = models.Overtime.objects.filter(user_id__manager=True, checked=False)
-        overtimes = models.Overtime.objects.filter(user_id__manager=True, checked=True)
+        n_leaves = models.Leave.objects.filter(user_id__manager=True, checked=False, month=mon, year=year)
+        leaves = models.Leave.objects.filter(user_id__manager=True, checked=True, month=mon, year=year)
+        n_overtimes = models.Overtime.objects.filter(user_id__manager=True, checked=False, month=mon, year=year)
+        overtimes = models.Overtime.objects.filter(user_id__manager=True, checked=True, month=mon, year=year)
     
     else:
-        n_leaves = models.Leave.objects.filter(checked=False, user_id__department=user.department).exclude(user_id=user.id)
-        leaves = models.Leave.objects.filter(checked=True, user_id__department=user.department).exclude(user_id=user.id)
-        n_overtimes = models.Overtime.objects.filter(checked=False, user_id__department=user.department).exclude(user_id=user.id)
-        overtimes = models.Overtime.objects.filter(checked=True, user_id__department=user.department).exclude(user_id=user.id)
+        n_leaves = models.Leave.objects.filter(checked=False, user_id__department=user.department, month=mon, year=year).exclude(user_id=user.id)
+        leaves = models.Leave.objects.filter(checked=True, user_id__department=user.department, month=mon, year=year).exclude(user_id=user.id)
+        n_overtimes = models.Overtime.objects.filter(checked=False, user_id__department=user.department, month=mon, year=year).exclude(user_id=user.id)
+        overtimes = models.Overtime.objects.filter(checked=True, user_id__department=user.department, month=mon, year=year).exclude(user_id=user.id)
     
     return render(request, 'login/check_list.html', locals())
 
@@ -367,7 +406,7 @@ def hr_menu(request):
 def hr_profile(request):
     if not request.session.get('is_hr', None):
         return redirect("/index/")
-    users = models.User.objects.all()
+    users = models.User.objects.all().exclude(name="admin")
     return render(request, 'hr/hr_profile.html', locals())
 
 def hr_personal(request, id):
@@ -481,11 +520,23 @@ def hr_attendance(request, id=0):
         title = "請選擇員工"
         href = "/hr/attendance"
         back = "/hr/menu/"
-        objects = models.User.objects.all()
+        objects = models.User.objects.all().exclude(name="admin")
         return render(request, 'hr/list.html', locals())
     else:
-        dailys = models.Daily.objects.filter(user_id__id=id)
+        month_form = forms.MonthForm()
+        year = datetime.datetime.today().year
+        mon = datetime.datetime.today().month
+        if request.method == "POST":
+            month_form = forms.MonthForm(request.POST)
+            if month_form.is_valid():
+                year = month_form.cleaned_data.get('year')
+                mon = month_form.cleaned_data.get('month')
+        user = models.User.objects.get(id=id)
+        dailys = models.Daily.objects.filter(user_id__id=id, month=mon, year=year)
         back = "/hr/menu/"
+        action = f"/hr/attendance/{id}/"
+        submit = "送出"
+        title = f"{year}/{mon} {user.name}出勤"
         return render(request, 'login/attendance.html', locals())
 
 def hr_leave(request, id=0):
@@ -499,10 +550,20 @@ def hr_leave(request, id=0):
         back = "/hr/menu/"
         return render(request, 'hr/list.html', locals())
     else:
+        month_form = forms.MonthForm()
+        year = datetime.datetime.today().year
+        mon = datetime.datetime.today().month
+        if request.method == "POST":
+            month_form = forms.MonthForm(request.POST)
+            if month_form.is_valid():
+                year = month_form.cleaned_data.get('year')
+                mon = month_form.cleaned_data.get('month')
+        action = f"/hr/leave/{id}/"
+        submit = "送出"
         mode = "leave"
         users = models.User.objects.get(id=id)
-        objects = models.Leave.objects.filter(user_id=id, checked=True)
-        title = f"{users.name}的已核准價單"
+        objects = models.Leave.objects.filter(user_id=id, month=mon, year=year, checked=True)
+        title = f"{year}/{mon} {users.name}的已核准價單"
         href = "/display_leave"
         back = "/hr/leave/"
         return render(request, 'hr/list.html', locals())
@@ -518,10 +579,20 @@ def hr_overtime(request, id=0):
         back = "/hr/menu/"
         return render(request, 'hr/list.html', locals())
     else:
+        month_form = forms.MonthForm()
+        year = datetime.datetime.today().year
+        mon = datetime.datetime.today().month
+        if request.method == "POST":
+            month_form = forms.MonthForm(request.POST)
+            if month_form.is_valid():
+                year = month_form.cleaned_data.get('year')
+                mon = month_form.cleaned_data.get('month')
+        action = f"/hr/overtime/{id}/"
+        submit = "送出"
         mode = "overtime"
         users = models.User.objects.get(id=id)
-        objects = models.Overtime.objects.filter(user_id=id, checked=True)
-        title = f"{users.name}的已核准加班單"
+        objects = models.Overtime.objects.filter(user_id=id, checked=True, month=mon, year=year)
+        title = f"{year}/{mon} {users.name}的已核准加班單"
         href = "/display_overtime"
         back = "/hr/overtime/"
         return render(request, 'hr/list.html', locals())
@@ -544,37 +615,123 @@ def hr_salary(request):
                     total = models.Total()
                     total.user_id = user
                 #overtime
-                Overtimes = models.Overtime.objects.filter(user_id__id=user.id, month=month, year=year)
+                Overtimes = models.Overtime.objects.filter(user_id__id=user.id, month=month, year=year, checked=True)
                 over_13 = 0
                 over_23 = 0
+                over_613 = 0
+                over_623 = 0
                 over_223 = 0
                 over_2 = 0
                 for overtime in Overtimes:
-                    over_13 += overtime.one_third
-                    over_23 += overtime.two_third
-                    if datetime.datetime(overtime.year, overtime.month, overtime.day).isoweekday() == 7:
+                    if datetime.datetime(overtime.year, overtime.month, overtime.day).isoweekday() == 6:
+                        over_613 += overtime.one_third
+                        over_623 += overtime.two_third
+                        over_223 += overtime.double
+                    elif datetime.datetime(overtime.year, overtime.month, overtime.day).isoweekday() == 7:
                         over_2 += overtime.double
                     else:
-                        over_223 += overtime.double
+                        over_13 += overtime.one_third
+                        over_23 += overtime.two_third
                 total.over_13 = over_13
                 total.over_23 = over_23
+                total.over_613 = over_613
+                total.over_623 = over_623
                 total.over_223 = over_223
                 total.over_2 = over_2
                 #leave
-                Leaves = models.Leave.objects.filter(user_id__id=user.id, month=month, year=year)
-                leave00 = 0
-                leave01 = 0
-                leave10 = 0
+                try:
+                    total_leave = models.Total_leave.objects.get(id=total.total_leave.id)
+                except:
+                    total_leave = models.Total_leave()
+                day_rate = float(user.salary)/float(30)
+                hour_rate = float(user.salary)/float(30*8)
+                minute_rate = float(hour_rate)/float(60)
+                Leaves = models.Leave.objects.filter(user_id__id=user.id, month=month, year=year, checked=True)
+                total_leave.sick = 0#hour
+                total_leave.sick_deduce = 0
+                total_leave.menstrual = 0#hour
+                total_leave.menstrual_deduce = 0
+                total_leave.personal = 0#hour
+                total_leave.personal_deduce = 0
+                total_leave.takecare = 0#hour
+                total_leave.care_deduce = 0
+                total_leave.nursery = 0#day
+                total_leave.nursery_deduce = 0
+                total_leave.unpaid = 0#day
+                total_leave.unpaid_deduce = 0
+                total_leave.other1 = 0#day
+                total_leave.other1_deduce = 0
+                total_leave.other2 = 0#hour
+                total_leave.other2_deduce = 0
+                total_leave.other3 = 0#hour
+                total_leave.other3_deduce = 0
+                total_leave.other4 = 0#day
+                total_leave.other4_deduce = 0
+                total_leave.business = 0#day
+                total_leave.official = 0#day
+                total_leave.injury = 0#day
+                total_leave.funeral = 0#day
+                total_leave.marriage = 0#day
+                total_leave.maternity = 0#day
+                total_leave.paternity = 0#day
+                total_leave.prenatal = 0#day
+                total_leave.annual = 0#day
+                total_leave.rest = 0#day
                 for leave in Leaves:
-                    if leave.rate == 0:
-                        leave10 += leave.total_time
-                    elif leave.rate == 0.5:
-                        leave01 += leave.total_time
+                    if leave.category == "病假":
+                        total_leave.sick += leave.total_time
+                        total_leave.sick_deduce += leave.total_time*hour_rate*0.5
+                    elif leave.category == "生理假":
+                        total_leave.menstrual += leave.total_time
+                        total_leave.menstrual_deduce += leave.total_time*hour_rate*0.5
+                    elif leave.category == "事假":
+                        total_leave.personal += leave.total_time
+                        total_leave.personal_deduce += leave.total_time*hour_rate
+                    elif leave.category == "家庭照顧假":
+                        total_leave.takecare += leave.total_time
+                        total_leave.care_deduce += leave.total_time*hour_rate
+                    elif leave.category == "育嬰假":
+                        total_leave.nursery += leave.total
+                        total_leave.nursery_deduce += leave.total*day_rate
+                    elif leave.category == "無薪假":
+                        total_leave.unpaid += leave.total
+                        total_leave.unpaid_deduce += leave.total*day_rate
+                    elif leave.category == "防疫隔離假":
+                        total_leave.other1 += leave.total
+                        total_leave.other1_deduce += leave.total*day_rate
+                    elif leave.category == "防疫照顧假":
+                        total_leave.other2 += leave.total_time
+                        total_leave.other2_deduce += leave.total_time*hour_rate
+                    elif leave.category == "疫苗接種假":
+                        total_leave.other3 += leave.total_time
+                        total_leave.other3_deduce += leave.total_time*hour_rate
+                    elif leave.category == "因公隔離":
+                        total_leave.other4 += leave.total
+                        total_leave.other4_deduce += leave.total*day_rate*0.5
+                    elif leave.category == "出差":
+                        total_leave.business += leave.total
+                    elif leave.category == "公假":
+                        total_leave.official += leave.total
+                    elif leave.category == "工傷假":
+                        total_leave.injury += leave.total
+                    elif leave.category == "喪假":
+                        total_leave.funeral += leave.total
+                    elif leave.category == "婚假":
+                        total_leave.marriage += leave.total
+                    elif leave.category == "產假":
+                        total_leave.maternity += leave.total
+                    elif leave.category == "陪產假":
+                        total_leave.paternity == leave.total
+                    elif leave.category == "產前假":
+                        total_leave.prenatal += leave.total
+                    elif leave.category == "特休":
+                        total_leave.annual += leave.total
+                    elif leave.category == "補休":
+                        total_leave.rest += leave.total
                     else:
-                        leave00 += leave.total_time
-                total.leave00 = leave00
-                total.leave01 = leave01
-                total.leave10 = leave10
+                        pass
+                total_leave.save()
+                total.total_leave = total_leave
                 #late
                 Dailys = models.Daily.objects.filter(user_id__id=user.id, month=month, year=year)
                 leave_early = 0
@@ -583,18 +740,53 @@ def hr_salary(request):
                 total.leave_early = leave_early
                 hour_rate = float(user.salary)/float(30*8)
                 minute_rate = float(hour_rate)/float(60)
-                add = (minute_rate*4/3)*over_13 + (minute_rate*5/3)*over_23 + (minute_rate*8/3)*over_223 + (minute_rate*2)*over_2
-                decrease = (hour_rate*0.5)*leave01 + (hour_rate)*leave00 + (minute_rate)*leave_early 
+                add = (minute_rate*4/3)*(over_13 + over_613) + (minute_rate*5/3)*(over_23 + over_623) + (minute_rate*8/3)*over_223 + (minute_rate*2)*over_2
+                decrease = total_leave.sick_deduce + total_leave.menstrual_deduce + total_leave.personal + total_leave.care_deduce + total_leave.nursery_deduce + total_leave.unpaid_deduce + total_leave.other1_deduce + total_leave.other2_deduce + total_leave.other3_deduce + total_leave.other4_deduce
                 decrease += function.convert_labor(user.labor) + function.convert_health(user.health) + function.convert_retirement(user.retirement) + user.retire_self
-                print(add)
-                print(decrease)
                 total.actual_salary = user.salary + add - decrease
                 total.save()
             message = "計算成功"
             return render(request, "hr/hr_menu.html", locals())
     else:
         month_form = forms.MonthForm()
+        action = "/hr/salary/"
+        mode = "user"
+        objects = models.User.objects.all()
+        href = "/hr/list_total"
+        back = "/hr/menu/"
+        title = "請選擇員工"
+        submit = "計算"
         return render(request, "hr/salary.html", locals())
+
+def list_total(request, userid=0):
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
+    if not request.session.get('is_salary', None):
+        return redirect("/hr/salary_pass/")
+    try:
+        user = models.User.objects.get(id=userid)
+    except:
+        return redirect("/hr/salary/")
+    objects = models.Total.objects.filter(user_id__id=userid)
+    mode = "total"
+    href = f"/hr/show_total"
+    back = "/hr/salary/"
+    title = f"{user.name}的薪資總表"
+    return render(request, "hr/salary.html", locals())
+
+def show_total(request, totalid=0):
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
+    if not request.session.get('is_salary', None):
+        return redirect("/hr/salary_pass/")
+    try:
+        total = models.Total.objects.get(id=totalid)
+    except:
+        return redirect("/hr/salary/")
+    labor = function.convert_labor(total.user_id.labor)
+    health = function.convert_health(total.user_id.health)
+    retire = function.convert_retirement(total.user_id.retirement)
+    return render(request, "hr/display_total.html", locals())
 
 def salary_pass(request):
     try:

@@ -1,5 +1,8 @@
 {%include "../templates.html"%}
 <body>
+    {% if mode == "leave" or mode == "overtime" %}
+    {%include "../hr/month.html"%}
+    {% endif %}
     <div class="container">
         <div class="col list">
             <h4 class="text-center"><br>{{title}}</h4>
@@ -13,7 +16,10 @@
                     {{object.start}}-{{object.category}}
                     {% endif %}
                     {% if mode == "overtime" %}
-                    {{object.date}}-{{object.reason}}
+                    {{object.month}}/{{object.day}}-{{object.reason}}
+                    {% endif %}
+                    {% if mode == "total"%}
+                    {{object.year}}年{{object.month}}月
                     {% endif %}
                 </a> 
                 {% endfor %}

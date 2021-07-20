@@ -1,0 +1,63 @@
+{%include "../templates.html"%}
+<body>
+    <div class="container">
+        <div class="col table-group">
+            <h6 class="text-center"><br>薪資表</h6>
+            <table class="table table-secondary table-hover table-responsive">
+                <tr>
+                    <td>姓名:</td><td>{{total.user_id.name}}</td>
+                    <td>月份:</td><td>{{total.year}}/{{total.month}}</td>
+                </tr>
+                <tr>
+                    <td>本薪:</td><td>{{total.user_id.salary}}</td>
+                    <td>遲到早退:</td><td>{{total.leave_early}}分</td>
+                </tr>
+            </table>
+            <table class="table table-secondary table-hover table-responsive">
+                <h6>應扣金額:</h6>
+                <tr>
+                    <td>勞保費:</td><td>{{labor}}</td>
+                    <td>公司提撥退休金:</td><td>{{retire}}</td>
+                </tr>
+                <tr>
+                    <td>健保費:</td><td>{{health}}</td>
+                    <td>自提撥退休金:</td><td>{{total.user_id.retire_self}}</td>
+                </tr>
+            </table>
+            <table class="table table-secondary table-hover table-responsive">
+                <h6>加班狀況:</h6>
+                <tr>
+                    <td>第一階段加班:</td><td>{{total.over_13}}分</td>
+                    <td>第二階段加班:</td><td>{{total.over_23}}分</td>
+                </tr>
+                <tr>
+                    <td>第二階段休息日加班:</td><td>{{total.over_223}}分</td>
+                    <td>例假日加班:</td><td>{{total.over_2}}分</td>
+                </tr>
+            </table>
+            <table class="table table-secondary table-hover table-responsive">
+                <h6>請假扣款:</h6>
+                <tr>
+                    <td>第一階段加班:</td><td>{{total.over_13}}分</td>
+                    <td>第二階段加班:</td><td>{{total.over_23}}分</td>
+                </tr>
+                <tr>
+                    <td>第二階段休息日加班:</td><td>{{total.over_223}}分</td>
+                    <td>例假日加班:</td><td>{{total.over_2}}分</td>
+                </tr>
+            </table>
+            <table class="table table-secondary table-hover table-responsive">
+                <h6>合計:</h6>
+                <tr>
+                    <td>應領金額:</td><td>{{total.user_id.salary}}</td>
+                    <td>應扣金額:</td><td></td>
+                </tr>
+                <tr>
+                    <td>實領金額:</td><td>{{total.actual_salary}}</td>
+                    <td>報稅金額:</td><td></td>
+                </tr>
+            </table>
+            <a href="/hr/list_total/{{total.user_id.id}}/" class="btn btn-info">回前頁</a>
+        </div>
+    </div>
+</body>
