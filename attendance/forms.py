@@ -70,8 +70,6 @@ class Passwd(forms.Form):
 
 class DailyForm(forms.Form):
     name = forms.CharField(label="Name", widget=forms.TextInput(attrs={'class':'form-control', 'autofocus':''}))
-    on_time = forms.TimeField(label="上班時間", widget=forms.TimeInput(attrs={'class':'form-control'}))
-    off_time = forms.TimeField(label="下班時間", widget=forms.TimeInput(attrs={'class':'form-control'}))
     on_time_fixed = forms.TimeField(label="上班時間(實際)", widget=forms.TimeInput(attrs={'class':'form-control'}), required=False)
     off_time_fixed = forms.TimeField(label="下班時間(實際)",widget=forms.TimeInput(attrs={'class':'form-control'}), required=False)
     fixed_note = forms.CharField(label="備註", widget=forms.TextInput(attrs={'class':'form-control'}), required=False)

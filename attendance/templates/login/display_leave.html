@@ -6,30 +6,31 @@
             <table class="table table-secondary table-hover table-responsive">
                 <tr>
                     <td>姓名:</td><td>{{leave.user_id.name}}</td>
+                    <td>假別:</td><td>{{leave.category}}</td>
                 </tr>
                 <tr>
                     <td>時間:</td>
-                    <td>{{leave.year}}, {{leave.month}}/{{leave.start.day}} {{leave.start.hour}}:{% if leave.start.minute < 10 %}0{% endif %}{{leave.start.minute}}
+                    <td>{{leave.year}} {{leave.month}}/{{leave.start.day}} {{leave.start.hour}}:{% if leave.start.minute < 10 %}0{% endif %}{{leave.start.minute}}
                         ~{{leave.month}}/{{leave.end.day}} {{leave.end.hour}}:{% if leave.end.minute < 10 %}0{% endif %}{{leave.end.minute}}</td>
-                </tr>
-                <tr>
                     <td>總計:</td><td>{{leave.total_time}}時 ({{leave.total}}日)</td>
                 </tr>
                 <tr>
-                    <td>假別:</td><td>{{leave.category}}:{{leave.other_reason}}</td>
-                </tr>
-                <tr>
                     <td>特殊原因或證明:</td><td>{{leave.special}}</td>
+                    <td></td><td></td>
                 </tr>
                 <tr>
                     <td>是否核准:</td><td>{% if leave.checked %}是{% else %}否{% endif %}</td>
+                    <td>已核銷:</td><td>{% if leave.double_check %}是{% else %}否{% endif %}</td>
                 </tr>
             </table>
-            <a href="/index/" class="btn btn-info">回功能列表</a>
-            {% if request.session.user_id == leave.user_id.id %}
+            <a href="/leave_list/" class="btn btn-info">回假單頁</a>
+            {% if request.session.is_hr %}
+                <a href="/hr/leave/{{leave.user_id.id}}/" class="btn btn-dark">回該員工假單</a>
+            {% endif %}
+            {% if request.session.user_id == leave.user_id.id and leave.double_check == False%}
                 <a href="/leave/{{id}}/" class="btn btn-secondary">修改假卡</a>
             {% endif %}
-            {% if request.session.is_manager == True or request.session.is_boss == True%}
+            {% if request.session.is_manager or request.session.is_boss %}
             {% if leave.checked == False %}
                 <form action="/check/" method="post">
                     {% csrf_token %}

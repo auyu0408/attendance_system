@@ -107,8 +107,6 @@ def daily(request, id=0):
     if request.method == 'POST':
         daily_form = forms.DailyForm(request.POST)
         if daily_form.is_valid():
-            daily.on_time = daily_form.cleaned_data.get('on_time')
-            daily.off_time = daily_form.cleaned_data.get('off_time')
             daily.on_time_fixed = daily_form.cleaned_data.get('on_time_fixed')
             daily.off_time_fixed = daily_form.cleaned_data.get('off_time_fixed')
             daily.fixed_note = daily_form.cleaned_data.get('fixed_note')
@@ -121,35 +119,25 @@ def daily(request, id=0):
             except:
                 message = "Wrong Name!"
                 return render(request, "hr/edit_daily.html", locals())
-            user_id = user
+            daily.user_id = user
             #get time
-            on = daily.on_time
-            off = daily.off_time
-            daily.attend = function.get_hour(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, off.hour, off.minute)
-            if off.hour >= 17:
-                daily.overtime = function.get_minute(daily.year, daily.month, daily.day, 17, 0, daily.year, daily.month, daily.day, off.hour, off.minute)
-            else:
-                daily.overtime = 0
-            if on.hour >= 8:
-                daily.leave_early = function.get_minute(daily.year, daily.month, daily.day, 8, 0, daily.year, daily.month, daily.day, on.hour, on.minute)
-            else:
-                daily.leave_early = 0
-            if off.hour < 17:
-                daily.leave_early = daily.leave_early + function.get_minute(daily.year, daily.month, daily.day, off.hour, off.minute, daily.year, daily.month, daily.day, 17, 0)
-            else:
-                daily.leave_early = daily.leave_early
             on = daily.on_time_fixed
             off = daily.off_time_fixed
             daily.attend_fixed = function.get_hour(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, off.hour, off.minute)
             if off.hour >= 17:
-                daily.overtime_fixed = function.get_minute(daily.year, daily.month, daily.day, 17, 0, daily.year, daily.month, daily.day, off.hour, off.minute)
+                if on.hour >= 17:
+                    daily.overtime_fixed = function.get_minute(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, off.hour, off.minute)
+                else:
+                    daily.overtime_fixed = function.get_minute(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, off.hour, off.minute) -function.get_minute(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, 17, 0)
+            elif datetime.datetime(daily.year, daily.month, daily.day, 0,0,0).isoweekday() == 6 or datetime.datetime(daily.year, daily.month, daily.day, 0,0,0).isoweekday() == 7:
+                daily.overtime = function.get_minute(daily.year,daily.month,daily.day,on.hour,on.minute,daily.year,daily.month,daily.day,off.hour,off.minute)
             else:
                 daily.overtime_fixed = 0
-            if on.hour >= 8:
+            if on.hour >= 8 and on.hour < 17:
                 daily.leave_early_fixed = function.get_minute(daily.year, daily.month, daily.day, 8, 0, daily.year, daily.month, daily.day, on.hour, on.minute)
             else:
                 daily.leave_early_fixed = 0
-            if off.hour < 17:
+            if off.hour < 17 and off.hour >8:
                 daily.leave_early_fixed = daily.leave_early_fixed + function.get_minute(daily.year, daily.month, daily.day, off.hour, off.minute, daily.year, daily.month, daily.day, 17, 0)
             else:
                 daily.leave_early_fixed = daily.leave_early_fixed
@@ -161,8 +149,7 @@ def daily(request, id=0):
             return render(request, "hr/edit_daily.html", locals())
     else:
         if id!=0:
-            daily_form = forms.DailyForm(initial={'name':daily.user_id.name, 'on_time':daily.on_time, 'off_time':daily.off_time,
-                                        'on_time_fixed':daily.on_time_fixed, 'off_time_fixed':daily.off_time_fixed,
+            daily_form = forms.DailyForm(initial={'name':daily.user_id.name, 'on_time_fixed':daily.on_time_fixed, 'off_time_fixed':daily.off_time_fixed,
                                         'year':daily.year, 'month':daily.month, 'day':daily.day,'fixed_note':daily.fixed_note,})
             return render(request, "hr/edit_daily.html", locals())
         else:
@@ -174,6 +161,8 @@ def leave(request,id=0):
         return redirect("/login/")
     if id!=0:
         leave = models.Leave.objects.get(id=id)
+        if leave.user_id.status != 0:
+            return redirect(f"/display_leave/{id}/") 
     else:
         leave = models.Leave()
     if request.method == 'POST':
@@ -191,6 +180,9 @@ def leave(request,id=0):
             leave.checked = False
             #get total time
             leave.total_time = function.get_hour(s.year, s.month, s.day, s.hour, s.minute, e.year, e.month, e.day, e.hour, e.minute)
+            if leave.total_time < 0 or e.year != leave.year or e.month !=leave.month:
+                message = "請注意輸入日期" 
+                return render(request, 'login/leave.html', locals())
             if leave.total_time - int(leave.total_time) > 0.5:
                 leave.total_time = int(leave.total_time) + 1
             elif leave.total_time - int(leave.total_time) == 0:
@@ -254,8 +246,10 @@ def overtime(request, id=0):
         return redirect("/login/")
     if id!=0:
         overtime = models.Overtime.objects.get(id=id)
+        if overtime.user_id.status != 0:
+            return redirect(f"/display_overtime/{id}")
     else:
-        overtime = models.Overtime()   
+        overtime = models.Overtime()
     if request.method == 'POST':
         overtime_form = forms.OvertimeForm(request.POST)
         message = "please check the input type"
@@ -418,6 +412,15 @@ def hr_personal(request, id):
         return redirect("/hr/profile/")
     back = "/hr/profile/"
     return render(request, 'login/profile.html', locals())
+
+def status(request, user, status):
+    try:
+        users = models.User.objects.get(id=user)
+    except:
+        return redirect("/hr/profile/")
+    users.status = status
+    users.save()
+    return redirect(f"/hr/profile/{user}")
 
 def hr_edit(request, id):
     if not request.session.get('is_hr', None):
@@ -597,6 +600,30 @@ def hr_overtime(request, id=0):
         back = "/hr/overtime/"
         return render(request, 'hr/list.html', locals())
 
+
+def hr_checked(request):
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
+    month_form = forms.MonthForm()
+    if request.method == "POST":
+        month_form = forms.MonthForm(request.POST)
+        if month_form.is_valid():
+            mon = month_form.cleaned_data.get('month')
+            year = month_form.cleaned_data.get('year')
+        Leaves = models.Leave.objects.filter(year=year, month=mon, check=True, double_check=False)
+        for leave in Leaves:
+            for day in range(leave.start.day, leave.end.day):
+                try:
+                    daily = models.Daily.objects.get(year=year, month=mon, day=day, user_id=leave.user_id)
+                    if daily.leave_early < leave.total_time*60:
+                        leave.double
+                except:
+                    leave.double_check = False
+                if daily.overtime_fixed == overtime.one_third + overtime.two_third + overtime.double:
+                    overtime.double_check = True
+                overtime.double_check = False
+    return redirect("/login/")
+
 def hr_salary(request):
     if not request.session.get('is_hr', None):
         return redirect("/index/")
@@ -607,76 +634,34 @@ def hr_salary(request):
         if month_form.is_valid():
             year = month_form.cleaned_data.get('year')
             month = month_form.cleaned_data.get('month')
-            Users = models.User.objects.all().exclude(name="admin")
+            Users = models.User.objects.all().exclude(name="admin", status=1)
             for user in Users:
                 try:
                     total = models.Total.objects.get(user_id__id=user.id, month=month, year=year)
+                    total_leave = models.Total_leave.objects.get(id=total.total_leave.id)
+                    total.reset()
+                    total_leave.reset()
                 except:
                     total = models.Total()
+                    total_leave = models.Total_leave()
                     total.user_id = user
                 #overtime
                 Overtimes = models.Overtime.objects.filter(user_id__id=user.id, month=month, year=year, checked=True)
-                over_13 = 0
-                over_23 = 0
-                over_613 = 0
-                over_623 = 0
-                over_223 = 0
-                over_2 = 0
                 for overtime in Overtimes:
                     if datetime.datetime(overtime.year, overtime.month, overtime.day).isoweekday() == 6:
-                        over_613 += overtime.one_third
-                        over_623 += overtime.two_third
-                        over_223 += overtime.double
+                        total.over_613 += overtime.one_third
+                        total.over_623 += overtime.two_third
+                        total.over_223 += overtime.double
                     elif datetime.datetime(overtime.year, overtime.month, overtime.day).isoweekday() == 7:
-                        over_2 += overtime.double
+                        total.over_2 += overtime.double
                     else:
-                        over_13 += overtime.one_third
-                        over_23 += overtime.two_third
-                total.over_13 = over_13
-                total.over_23 = over_23
-                total.over_613 = over_613
-                total.over_623 = over_623
-                total.over_223 = over_223
-                total.over_2 = over_2
+                        total.over_13 += overtime.one_third
+                        total.over_23 += overtime.two_third
                 #leave
-                try:
-                    total_leave = models.Total_leave.objects.get(id=total.total_leave.id)
-                except:
-                    total_leave = models.Total_leave()
                 day_rate = float(user.salary)/float(30)
                 hour_rate = float(user.salary)/float(30*8)
                 minute_rate = float(hour_rate)/float(60)
                 Leaves = models.Leave.objects.filter(user_id__id=user.id, month=month, year=year, checked=True)
-                total_leave.sick = 0#hour
-                total_leave.sick_deduce = 0
-                total_leave.menstrual = 0#hour
-                total_leave.menstrual_deduce = 0
-                total_leave.personal = 0#hour
-                total_leave.personal_deduce = 0
-                total_leave.takecare = 0#hour
-                total_leave.care_deduce = 0
-                total_leave.nursery = 0#day
-                total_leave.nursery_deduce = 0
-                total_leave.unpaid = 0#day
-                total_leave.unpaid_deduce = 0
-                total_leave.other1 = 0#day
-                total_leave.other1_deduce = 0
-                total_leave.other2 = 0#hour
-                total_leave.other2_deduce = 0
-                total_leave.other3 = 0#hour
-                total_leave.other3_deduce = 0
-                total_leave.other4 = 0#day
-                total_leave.other4_deduce = 0
-                total_leave.business = 0#day
-                total_leave.official = 0#day
-                total_leave.injury = 0#day
-                total_leave.funeral = 0#day
-                total_leave.marriage = 0#day
-                total_leave.maternity = 0#day
-                total_leave.paternity = 0#day
-                total_leave.prenatal = 0#day
-                total_leave.annual = 0#day
-                total_leave.rest = 0#day
                 for leave in Leaves:
                     if leave.category == "病假":
                         total_leave.sick += leave.total_time
@@ -738,12 +723,22 @@ def hr_salary(request):
                 for daily in Dailys:
                     leave_early += daily.leave_early_fixed
                 total.leave_early = leave_early
-                hour_rate = float(user.salary)/float(30*8)
-                minute_rate = float(hour_rate)/float(60)
-                add = (minute_rate*4/3)*(over_13 + over_613) + (minute_rate*5/3)*(over_23 + over_623) + (minute_rate*8/3)*over_223 + (minute_rate*2)*over_2
-                decrease = total_leave.sick_deduce + total_leave.menstrual_deduce + total_leave.personal + total_leave.care_deduce + total_leave.nursery_deduce + total_leave.unpaid_deduce + total_leave.other1_deduce + total_leave.other2_deduce + total_leave.other3_deduce + total_leave.other4_deduce
-                decrease += function.convert_labor(user.labor) + function.convert_health(user.health) + function.convert_retirement(user.retirement) + user.retire_self
-                total.actual_salary = user.salary + add - decrease
+                if total.over_13 + total.over_23 > 46*60:
+                    total.tax_over = (total.over_13 + total.over_23 - 46*60)/60
+                    total.tax_over_add = (total.over_13 + total.over_23 - 46*60) * (minute_rate*5/3)
+                    total.free_over = (total.over_13+total.over_23+total.over_613+total.over_623+total.over_223+total.over_2-46*60)/60
+                    total.free_over_add = (total.over_13+total.over_613)*(minute_rate*4/3)  + (total.over_23+total.over_623-total.tax_over*60)*(minute_rate*5/3) + total.over_223*(minute_rate*8/3) + total.over2*minute_rate*2
+                else:
+                    total.tax_over = 0
+                    total.tax_over_add = 0
+                    total.free_over = round((total.over_13+total.over_23+total.over_613+total.over_623+total.over_223+total.over_2)/60,2)
+                    total.free_over_add = (total.over_13+total.over_613)*(minute_rate*4/3)  + (total.over_23+total.over_623)*(minute_rate*5/3) + total.over_223*(minute_rate*8/3) + total.over_2*minute_rate*2
+                decrease = total_leave.care_deduce + total_leave.sick_deduce +total_leave.other1_deduce + total_leave.other2_deduce + total_leave.other3_deduce + total_leave.other4_deduce + total_leave.unpaid_deduce + total_leave.nursery_deduce + total_leave.personal_deduce + total_leave.menstrual_deduce
+                decrease += total.leave_early * minute_rate
+                total.tax = user.salary - decrease + total.tax_over_add
+                decrease += function.convert_labor(user.labor) + function.convert_health(user.health) + user.retire_self
+                total.decrease = decrease
+                total.actual_salary = user.salary - total.decrease + total.tax_over_add + total.free_over_add
                 total.save()
             message = "計算成功"
             return render(request, "hr/hr_menu.html", locals())
@@ -843,7 +838,7 @@ def check_in_out(request):
         now = timezone.now()
         user_id = request.POST.get('user_id')
         try:
-            user = models.User.objects.get(user_id=user_id)
+            user = models.User.objects.get(user_id=user_id, status=0)
         except:
             message = "Wrong ID."
             return render(request, 'hr/check_in_out.html', {'message': message})
@@ -869,17 +864,25 @@ def check_in_out(request):
         off = daily.off_time
         daily.attend = function.get_hour(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, off.hour, off.minute)
         if off.hour >= 17:
-            daily.overtime = function.get_minute(daily.year, daily.month, daily.day, 17, 0, daily.year, daily.month, daily.day, off.hour, off.minute)
+            if on.hour < 17:
+                daily.overtime = function.get_minute(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, off.hour, off.minute)-function.get_minute(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, 17, 0)
+            else:
+                daily.overtime = function.get_minute(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, off.hour, off.minute)
+        elif datetime.datetime(daily.year, daily.month, daily.day, 0, 0, 0).isoweekday() == 6 and datetime.datetime(daily.year,daily.month,daily.day,0,0,0).isoweekday() == 7:
+            datetime.overtime = function.get_minute(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, off.hour, off.minute)
         else:
             daily.overtime = 0
-        if on.hour >= 8:
-            daily.leave_early = function.get_minute(daily.year, daily.month, daily.day, 8, 0, daily.year, daily.month, daily.day, on.hour, on.minute)
-        else:
+        if datetime.datetime(daily.year, daily.month, daily.day, 0, 0, 0).isoweekday == 6:
             daily.leave_early = 0
-        if off.hour < 17:
-            daily.leave_early = daily.leave_early + function.get_minute(daily.year, daily.month, daily.day, off.hour, off.minute, daily.year, daily.month, daily.day, 17, 0)
         else:
-            daily.leave_early = daily.leave_early
+            if on.hour >= 8 and on.hour <= 17:
+                daily.leave_early = function.get_minute(daily.year, daily.month, daily.day, 8, 0, daily.year, daily.month, daily.day, on.hour, on.minute)
+            else:
+                daily.leave_early = 0
+            if off.hour < 17 and off.hour >=8:
+                daily.leave_early = daily.leave_early + function.get_minute(daily.year, daily.month, daily.day, off.hour, off.minute, daily.year, daily.month, daily.day, 17, 0)
+            else:
+                daily.leave_early = daily.leave_early
         daily.attend_fixed = daily.attend
         daily.overtime_fixed = daily.overtime
         daily.leave_early_fixed = daily.leave_early

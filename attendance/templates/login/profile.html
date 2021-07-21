@@ -50,7 +50,16 @@
                 <a href="/change_passwd/" class="btn btn-warning">更改密碼</a>
             {% endif %}
             {% if back == "/hr/profile/" %}
-                <a href="/hr/edit/{{id}}/" class="btn btn-secondary">修改資料</a>
+                {% if user.status != 1 %}
+                    <a href="/hr/edit/{{id}}/" class="btn btn-warning">修改資料</a>
+                    <a href="/hr/status/{{id}}/1/" class="btn btn-danger">離職</a>
+                {% endif %}
+                {% if user.status == 0 %}
+                    <a href="/hr/status/{{id}}/2/" class="btn btn-secondary">留職停薪</a>
+                {% endif %}
+                {% if user.status == 2 %}
+                    <a href="/hr/status/{{id}}/0/" class="btn btn-success">復職</a>
+                {% endif %}
             {% endif %}
         </div>
     </div>

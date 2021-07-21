@@ -41,7 +41,7 @@ class User(models.Model):
     status = models.PositiveSmallIntegerField(default=0)#在職=0,離職=1,留職停薪=2
     #Meta
     class Meta:
-        ordering = ['on_job']
+        ordering = ['status', 'on_job']
     #Methods
 
 class Leave(models.Model):
@@ -59,7 +59,7 @@ class Leave(models.Model):
         因公隔離 = '因公隔離'#0.5
         出差 = '出差'
         公假 = '公假'
-        工傷假 = '工傷假'
+        公傷假 = '公傷假'
         喪假 = '喪假'
         婚假 = '婚假'
         產假 = '產假'
@@ -120,6 +120,7 @@ class Daily(models.Model):
     leave_early_fixed = models.PositiveSmallIntegerField(default=0)
     holiday = models.CharField(max_length=256, blank=True, null=True)
     fixed_note = models.CharField(max_length=256, blank=True, null=True)
+    check = models.BooleanField(default=False)
     #Meta
     class Meta:
         ordering = ['-year', '-month', '-day']
@@ -156,6 +157,41 @@ class Total_leave(models.Model):
     prenatal = models.FloatField(default=0)#day
     annual = models.FloatField(default=0)#day
     rest = models.FloatField(default=0)#day
+    #Method
+    def reset(self):
+        obj = self
+        obj.sick = 0#hour
+        obj.sick_deduce = 0
+        obj.menstrual = 0#hour
+        obj.menstrual_deduce = 0
+        obj.personal = 0#hour
+        obj.personal_deduce = 0
+        obj.takecare = 0#hour
+        obj.care_deduce = 0
+        obj.nursery = 0#day
+        obj.nursery_deduce = 0
+        obj.unpaid = 0#day
+        obj.unpaid_deduce = 0
+        obj.other1 = 0#day
+        obj.other1_deduce = 0
+        obj.other2 = 0#hour
+        obj.other2_deduce = 0
+        obj.other3 = 0#hour
+        obj.other3_deduce = 0
+        obj.other4 = 0#day
+        obj.other4_deduce = 0
+        obj.business = 0#day
+        obj.official = 0#day
+        obj.injury = 0#day
+        obj.funeral = 0#day
+        obj.marriage = 0#day
+        obj.maternity = 0#day
+        obj.paternity = 0#day
+        obj.prenatal = 0#day
+        obj.annual = 0#day
+        obj.rest = 0#day
+        obj.save()
+        return obj
 
 class Total(models.Model):
     #Field
@@ -169,6 +205,10 @@ class Total(models.Model):
     over_623 = models.PositiveSmallIntegerField(default=0)
     over_223 = models.PositiveSmallIntegerField(default=0)
     over_2  = models.PositiveSmallIntegerField(default=0)
+    free_over = models.PositiveSmallIntegerField(default=0)
+    tax_over = models.PositiveSmallIntegerField(default=0)
+    free_over_add = models.PositiveIntegerField(default=0)
+    tax_over_add = models.PositiveIntegerField(default=0)
     total_leave = models.ForeignKey(Total_leave, on_delete=CASCADE)
     decrease = models.PositiveIntegerField(default=0)#應扣金額
     leave_early = models.PositiveIntegerField(default=0)
@@ -179,3 +219,23 @@ class Total(models.Model):
     class Meta:
         ordering = ['-year', '-month']
     #Method
+    def reset(self):
+        obj = self
+        obj.over_13 = 0
+        obj.over_23 = 0
+        obj.over_613 = 0
+        obj.over_623 = 0
+        obj.over_223 = 0
+        obj.over_2 = 0
+        obj.decrease = 0
+        obj.leave_early = 0
+        obj.tax = 0
+        obj.absence = 0
+        obj.actual_salary = 0
+        obj.save()
+        return obj
+    def delete(self):
+        obj = self
+        obj.total_leave.delete()
+        obj.delete()
+        return

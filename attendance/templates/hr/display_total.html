@@ -1,63 +1,113 @@
 {%include "../templates.html"%}
 <body>
     <div class="container">
-        <div class="col table-group">
-            <h6 class="text-center"><br>薪資表</h6>
-            <table class="table table-secondary table-hover table-responsive">
-                <tr>
-                    <td>姓名:</td><td>{{total.user_id.name}}</td>
-                    <td>月份:</td><td>{{total.year}}/{{total.month}}</td>
-                </tr>
-                <tr>
-                    <td>本薪:</td><td>{{total.user_id.salary}}</td>
-                    <td>遲到早退:</td><td>{{total.leave_early}}分</td>
-                </tr>
-            </table>
-            <table class="table table-secondary table-hover table-responsive">
-                <h6>應扣金額:</h6>
-                <tr>
-                    <td>勞保費:</td><td>{{labor}}</td>
-                    <td>公司提撥退休金:</td><td>{{retire}}</td>
-                </tr>
-                <tr>
-                    <td>健保費:</td><td>{{health}}</td>
-                    <td>自提撥退休金:</td><td>{{total.user_id.retire_self}}</td>
-                </tr>
-            </table>
-            <table class="table table-secondary table-hover table-responsive">
-                <h6>加班狀況:</h6>
-                <tr>
-                    <td>第一階段加班:</td><td>{{total.over_13}}分</td>
-                    <td>第二階段加班:</td><td>{{total.over_23}}分</td>
-                </tr>
-                <tr>
-                    <td>第二階段休息日加班:</td><td>{{total.over_223}}分</td>
-                    <td>例假日加班:</td><td>{{total.over_2}}分</td>
-                </tr>
-            </table>
-            <table class="table table-secondary table-hover table-responsive">
-                <h6>請假扣款:</h6>
-                <tr>
-                    <td>第一階段加班:</td><td>{{total.over_13}}分</td>
-                    <td>第二階段加班:</td><td>{{total.over_23}}分</td>
-                </tr>
-                <tr>
-                    <td>第二階段休息日加班:</td><td>{{total.over_223}}分</td>
-                    <td>例假日加班:</td><td>{{total.over_2}}分</td>
-                </tr>
-            </table>
-            <table class="table table-secondary table-hover table-responsive">
-                <h6>合計:</h6>
-                <tr>
-                    <td>應領金額:</td><td>{{total.user_id.salary}}</td>
-                    <td>應扣金額:</td><td></td>
-                </tr>
-                <tr>
-                    <td>實領金額:</td><td>{{total.actual_salary}}</td>
-                    <td>報稅金額:</td><td></td>
-                </tr>
-            </table>
-            <a href="/hr/list_total/{{total.user_id.id}}/" class="btn btn-info">回前頁</a>
+        <div class="row">
+            <div class="col-6 table-group">
+                <h6 class="text-center"><br>薪資表</h6>
+                <table class="table table-secondary table-hover table-responsive">
+                    <tr>
+                        <td>姓名:</td><td>{{total.user_id.name}}</td>
+                        <td>月份:</td><td>{{total.year}}/{{total.month}}</td>
+                    </tr>
+                    <tr>
+                        <td>本薪:</td><td>{{total.user_id.salary}}</td>
+                        <td>遲到早退:</td><td>{{total.leave_early}}分</td>
+                    </tr>
+                </table>
+                <table class="table table-secondary table-hover table-responsive">
+                    <h6>應扣金額:</h6>
+                    <tr>
+                        <td>勞保費:</td><td>{{labor}}</td>
+                        <td>公司提撥退休金:</td><td>{{retire}}</td>
+                    </tr>
+                    <tr>
+                        <td>健保費:</td><td>{{health}}</td>
+                        <td>自提撥退休金:</td><td>{{total.user_id.retire_self}}</td>
+                    </tr>
+                </table>
+                <table class="table table-secondary table-hover table-responsive">
+                    <h6>加班狀況:</h6>
+                    <tr>
+                        <td>第一階段加班:</td><td>{{total.over_13}}分</td>
+                        <td>第二階段加班:</td><td>{{total.over_23}}分</td>
+                    </tr>
+                    <tr>
+                        <td>第一階段休息日班:</td><td>{{total.over_613}}分</td>
+                        <td>第二階段休息日班:</td><td>{{total.over_623}}分</td>
+                    </tr>
+                    <tr>
+                        <td>第三階段休息日加班:</td><td>{{total.over_223}}分</td>
+                        <td>例假日加班:</td><td>{{total.over_2}}分</td>
+                    </tr>
+                </table>
+                <table class="table table-secondary table-hover table-responsive">
+                    <h6>合計:</h6>
+                    <tr>
+                        <td>應領金額:</td><td>{{total.user_id.salary}}</td>
+                        <td>應扣金額:</td><td>{{total.decrease}}</td>
+                    </tr>
+                    <tr>
+                        <td>實領金額:</td><td>{{total.actual_salary}}</td>
+                        <td>報稅金額:</td><td>{{total.tax}}</td>
+                    </tr>
+                </table>
+                <a href="/hr/list_total/{{total.user_id.id}}/" class="btn btn-info">回前頁</a>
+            </div>
+            <div class="col-6 table-group">
+                <table class="table table-secondary table-hover table-responsive">
+                    <h6><br><br>請假扣款:</h6>
+                    <tr>
+                        <td>普通傷病假</td><td>{{total.total_leave.sick}}時(扣薪:{{total.total_leave.sick_deduce}})</td>
+                        <td>出差</td><td>{{total.total_leave.business}}天</td>
+                    </tr>
+                    <tr>
+                        <td>生理假</td><td>{{total.total_leave.menstrual}}時(扣薪:{{total.total_leave.menstrual_deduce}})</td>
+                        <td>公假</td><td>{{total.total_leave.official}}天</td>
+                    </tr>
+                    <tr>
+                        <td>事假</td><td>{{total.total_leave.personal}}時(扣薪:{{total.total_leave.personal_deduce}})</td>
+                        <td>公傷假</td><td>{{total.total_leave.injury}}天</td>
+                    </tr>
+                    <tr>
+                        <td>家庭照顧假</td><td>{{total.total_leave.takecare}}時(扣薪:{{total.total_leave.care_deduce}})</td>
+                        <td>喪假</td><td>{{total.total_leave.funeral}}天</td>
+                    </tr>
+                    <tr>
+                        <td>育嬰假</td><td>{{total.total_leave.nursery}}天(扣薪:{{total.total_leave.nursery_deduce}})</td>
+                        <td>婚假</td><td>{{total.total_leave.marriage}}天</td>
+                    </tr>
+                    <tr>
+                        <td>無薪假</td><td>{{total.total_leave.unpaid}}天(扣薪:{{total.total_leave.unpaid_deduce}})</td>
+                        <td>產假</td><td>{{total.total_leave.maternity}}天</td>
+                    </tr>
+                    <tr>
+                        <td>防疫隔離假</td><td>{{total.total_leave.other1}}天(扣薪:{{total.total_leave.other1_deduce}})</td>
+                        <td>陪產假</td><td>{{total.total_leave.paternity}}天</td>
+                    </tr>
+                    <tr>
+                        <td>防疫照顧假</td><td>{{total.total_leave.other2}}時(扣薪:{{total.total_leave.other2_deduce}})</td>
+                        <td>產檢假</td><td>{{total.total_leave.prenatal}}天</td>
+                    </tr>
+                    <tr>
+                        <td>疫苗接種</td><td>{{total.total_leave.other3}}時(扣薪:{{total.total_leave.other3_deduce}})</td>
+                        <td>特休</td><td>{{total.total_leave.annual}}天</td>
+                    </tr>
+                    <tr>
+                        <td>因公隔離</td><td>{{total.total_leave.other4}}天(扣薪:{{total.total_leave.other4_deduce}})</td>
+                        <td>補休</td><td>{{total.total_leave.rest}}天</td>
+                    </tr>
+                </table>
+                <table class="table table-secondary table-hover table-responsive">
+                    <tr>
+                        <td>免稅加班</td><td>{{total.free_over}}時</td>
+                        <td>加班費</td><td>{{total.free_over_add}}</td>
+                    </tr>
+                    <tr>
+                        <td>應稅加班</td><td>{{total.tax_over}}時</td>
+                        <td>加班費</td><td>{{total.tax_over_add}}</td>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
 </body>

@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 import datetime
-from . import models
+
+from django.shortcuts import render
 stander=[[0, 24000, 25200, 26400, 27600, 28800, 30300, 31800, 33300, 34800, 36300, 38200, 40100, 42000, 43900, 45800, 48200, 50600, 53000, 55400, 57800, 60800, 63800, 66800, 69800, 72800, 76500, 80200, 83900, 87600, 92100, 96600, 101100, 105600, 110100, 115500, 120900, 126300, 131700, 137100, 142500, 147900, 150000, 156400, 162800, 169200, 175600, 182000],
         [ 0, 552,   579,   607,   635,   663,   697,   732,   766,   801,   835,   878,   922,   966,   1010,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,  1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054,   1054],
         [ 0, 372,   391,   409,   428,   447,   470,   493,   516,   540,   563,   592,   622,   651,   681,   710,   748,   785,   822,   859,   896,   943,   990,   1036,  1083,  1129,  1187,  1244,  1301,  1359,  1428,  1498,  1568,   1638,   1708,   1791,   1875,   1959,   2043,   2126,   2210,   2294,   2327,   2426,   2525,   2624,   2724,   2823],
@@ -76,12 +77,18 @@ def get_annual(year,month,day):
     return annual
 
 def get_day(sy,sb,sd,sh,sm,ey,eb,ed,eh,em):
+    if sy == ey and sb == eb:
+        pass
+    else:
+        return -1
     if sh == 12:
         sh = 13
         sm = 0
     if eh == 12:
         em = 0
     day1 = datetime.datetime(ey,eb,ed,eh,em,0)-datetime.datetime(sy,sb,sd,sh,sm,0)
+    if day1.days < 0:
+        return -1
     hour = day1.seconds/60/60
     minute = (day1.seconds-hour*3600)/60
     if minute > 30:
@@ -130,5 +137,5 @@ def get_weekend(sy,sb,sd,sh,sm,ey,eb,ed,eh,em):
 #print (find_labor(80000), find_health(80000), find_retirement(80000))
 #print (convert_labor(find_labor(80000)), convert_health(find_health(80000)), convert_retirement(find_retirement(80000)))
 #print (get_annual(1997,7,17))
-#print(get_hour(2021,7,17,8,11,2021,7,17,17,00))
+#print(get_day(2021,7,14,8,00,2021,7,14,17,00))
 #print(int(4.83))        

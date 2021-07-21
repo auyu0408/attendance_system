@@ -49,6 +49,7 @@ urlpatterns = [
         path('menu/', views.hr_menu),
         path('profile/', views.hr_profile),
         path('profile/<int:id>/', views.hr_personal),
+        path('status/<int:user>/<int:status>/', views.status),
 
         path('edit/<int:id>/', views.hr_edit),
         path('register/', views.hr_register),

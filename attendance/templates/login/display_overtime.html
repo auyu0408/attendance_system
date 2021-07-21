@@ -6,31 +6,33 @@
             <table class="table table-secondary table-hover table-responsive">
                 <tr>
                     <td>姓名:</td><td>{{overtime.user_id.name}}</td>
-                </tr>
-                <t>
                     <td>時間:</td><td>{{overtime.year}}/{{overtime.month}}/{{overtime.day}} {{overtime.start}}~{{overtime.end}}</td>
                 </tr>
                 <tr>
-                    <td>給薪=一又1/3:</td><td>{{overtime.one_third}}分</td>
+                    <td>第一階段加班</td><td>{{overtime.one_third}}分</td>
+                    <td>第二階段加班</td><td>{{overtime.two_third}}分</td>
                 </tr>
                 <tr>
-                    <td>給薪=一又2/3:</td><td>{{overtime.two_third}}分</td>
-                </tr>
-                <tr>
-                    <td>給薪=二或二又2/3:</td><td>{{overtime.double}}分</td>
+                    <td>第三階段加班</td><td>{{overtime.double}}分</td>
+                    <td></td><td></td>
                 </tr>
                 <tr>
                     <td>原因:</td><td>{{overtime.reason}}</td>
+                    <td></td><td></td>
                 </tr>
                 <tr>
                     <td>是否核准:</td><td>{% if overtime.checked %}是{% else %}否{% endif %}</td>
+                    <td>已核銷:</td><td>{% if overtime.double_check %}是{% else %}否{% endif %}</td>
                 </tr>
             </table>
-            <a href="/index/" class="btn btn-info">回功能列表</a>
-            {% if request.session.user_id == overtime.user_id.id %}
+            <a href="/overtime_list/" class="btn btn-info">回假單頁</a>
+            {% if request.session.is_hr %}
+                <a href="/hr/overtime/{{overtime.user_id.id}}" class="btn btn-dark">回該員工假單</a>
+            {% endif %}
+            {% if request.session.user_id == overtime.user_id.id and overtime.double_check == False %}
                 <a href="/overtime/{{id}}/" class="btn btn-secondary">修改假卡</a>
             {% endif %}
-            {% if request.session.is_manager == True or request.session.is_boss == True %}
+            {% if request.session.is_manager or request.session.is_boss %}
             {% if overtime.checked == False %}
                 <form action="/check/" method="post">
                     {% csrf_token %}
