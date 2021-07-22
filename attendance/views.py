@@ -124,13 +124,13 @@ def daily(request, id=0):
             on = daily.on_time_fixed
             off = daily.off_time_fixed
             daily.attend_fixed = function.get_hour(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, off.hour, off.minute)
-            if off.hour >= 17:
+            if datetime.datetime(daily.year, daily.month, daily.day, 0,0,0).isoweekday() == 6 or datetime.datetime(daily.year, daily.month, daily.day, 0,0,0).isoweekday() == 7:
+                daily.overtime_fixed = function.get_minute(daily.year,daily.month,daily.day,on.hour,on.minute,daily.year,daily.month,daily.day,off.hour,off.minute)
+            elif off.hour >= 17:
                 if on.hour >= 17:
                     daily.overtime_fixed = function.get_minute(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, off.hour, off.minute)
                 else:
                     daily.overtime_fixed = function.get_minute(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, off.hour, off.minute) -function.get_minute(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, 17, 0)
-            elif datetime.datetime(daily.year, daily.month, daily.day, 0,0,0).isoweekday() == 6 or datetime.datetime(daily.year, daily.month, daily.day, 0,0,0).isoweekday() == 7:
-                daily.overtime = function.get_minute(daily.year,daily.month,daily.day,on.hour,on.minute,daily.year,daily.month,daily.day,off.hour,off.minute)
             else:
                 daily.overtime_fixed = 0
             if on.hour >= 8 and on.hour < 17:
@@ -143,7 +143,7 @@ def daily(request, id=0):
                 daily.leave_early_fixed = daily.leave_early_fixed
             daily.save()
             message = "修改成功"
-            return render(request, "login/index.html", {'message':message})
+            return render(request, "login/index.html", locals())
         else:
             message = "Wrong type."
             return render(request, "hr/edit_daily.html", locals())
@@ -151,10 +151,9 @@ def daily(request, id=0):
         if id!=0:
             daily_form = forms.DailyForm(initial={'name':daily.user_id.name, 'on_time_fixed':daily.on_time_fixed, 'off_time_fixed':daily.off_time_fixed,
                                         'year':daily.year, 'month':daily.month, 'day':daily.day,'fixed_note':daily.fixed_note,})
-            return render(request, "hr/edit_daily.html", locals())
         else:
             daily_form = forms.DailyForm()
-            return render(request, "hr/edit_daily.html", locals())
+        return render(request, "hr/edit_daily.html", locals())
 
 def leave(request,id=0):
     if not request.session.get('is_login', None):
@@ -372,11 +371,46 @@ def check(request):
         form_type = request.POST['form_type']
         if form_type == "leave":
             leave = models.Leave.objects.get(id=id)
+            day = leave.end.day - leave.start.day
+            print(day)
+            if day == 0:
+                try:
+                    daily = models.Daily.objects.get(year=leave.year, month=leave.month, day=leave.start.day, user_id=leave.user_id)
+                except:
+                    daily = models.Daily(year=leave.year, month=leave.month, day=leave.start.day, user_id=leave.user_id)
+                daily.holiday = leave.total_time
+                daily.save()
+            else:
+                try:
+                    daily = models.Daily.objects.get(year=leave.year, month=leave.month, day=leave.start.day, user_id=leave.user_id)
+                except:
+                    daily = models.Daily(year=leave.year, month=leave.month, day=leave.start.day, user_id=leave.user_id)
+                daily.holiday = function.get_hour(leave.year, leave.month, leave.start.day, leave.start.hour, leave.start.minute, leave.year, leave.month, leave.start.day, 17, 0)
+                daily.save()
+                for date in range(leave.start.day+1, leave.end.day):
+                    try:
+                        daily = models.Daily.objects.get(year=leave.year, month=leave.month, day=date, user_id=leave.user_id)
+                    except:
+                        daily = models.Daily(year=leave.year, month=leave.month, day=date, user_id=leave.user_id)
+                    daily.holiday = 8
+                    daily.save()
+                try:
+                    daily = models.Daily.objects.get(year=leave.year, month=leave.month, day=leave.end.day, user_id=leave.user_id)
+                except:
+                    daily = models.Daily(year=leave.year, month=leave.month, day=leave.end.day, user_id=leave.user_id)
+                daily.holiday = function.get_hour(leave.year, leave.month, leave.end.day, 8, 0, leave.year, leave.month, leave.end.day, leave.end.hour, leave.end.minute)
+                daily.save()
             leave.checked = True
             leave.save()
         else:
             overtime = models.Overtime.objects.get(id=id)
             overtime.checked = True
+            day = overtime.day
+            try:
+                daily = models.Daily.objects.get(year=overtime.year, month=overtime.month, day=overtime.day, user_id=overtime.user_id)
+            except:
+                daily =models.Daily(year=overtime.year, month=overtime.month, day=overtime.day, user_id=overtime.user_id)
+            daily.can_overtime = overtime.one_third + overtime.two_third + overtime.double
             overtime.save()
     return redirect(f"/display_{form_type}/{id}/")
 
@@ -444,8 +478,8 @@ def hr_edit(request, id):
             user.health = function.find_health(user.salary)
             user.retirement = function.find_retirement(user.salary)
             user.retire_self = function.retire_M(user.retirement)*user.self_percent/100
-            user.annual = function.get_annual(user.on_job.year, user.on_job.month, user.on_job.day)
-            user.annual_left = user.annual - 0
+            user.seniority = function.get_seniority(user.on_job.year, user.on_job.month, user.on_job.day)
+            user.annual = function.get_annual(user.seniority)
             user.save()
             return redirect(f'/hr/profile/{user.id}/')
     func = "edit"
@@ -477,7 +511,6 @@ def hr_register(request):
             new_User.manager = register_form.cleaned_data.get('manager')
             new_User.staff = register_form.cleaned_data.get('staff')
             new_User.self_percent = register_form.cleaned_data.get('self_percent')
-
             user_id = register_form.cleaned_data.get('user_id')
             passwd = register_form.cleaned_data.get('passwd')
             email = register_form.cleaned_data.get('email')
@@ -501,8 +534,8 @@ def hr_register(request):
             new_User.health = function.find_health(new_User.salary)
             new_User.retirement = function.find_retirement(new_User.salary)
             new_User.retire_self = function.retire_M(new_User.retirement)*new_User.self_percent/100
-            new_User.annual = function.get_annual(new_User.on_job.year, new_User.on_job.month, new_User.on_job.day)
-            new_User.annual_left = new_User.annual - 0
+            new_User.seniority = function.get_seniority(new_User.on_job.year, new_User.on_job.month, new_User.on_job.day)
+            new_User.annual = function.get_annual(new_User.seniority)
             new_User.save()
             #redirect
             return redirect('/hr/menu/')
@@ -599,7 +632,6 @@ def hr_overtime(request, id=0):
         href = "/display_overtime"
         back = "/hr/overtime/"
         return render(request, 'hr/list.html', locals())
-
 
 def hr_checked(request):
     if not request.session.get('is_hr', None):
@@ -717,6 +749,7 @@ def hr_salary(request):
                         pass
                 total_leave.save()
                 total.total_leave = total_leave
+                user.annual_user += total_leave.annual
                 #late
                 Dailys = models.Daily.objects.filter(user_id__id=user.id, month=month, year=year)
                 leave_early = 0
@@ -863,13 +896,13 @@ def check_in_out(request):
         on = daily.on_time
         off = daily.off_time
         daily.attend = function.get_hour(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, off.hour, off.minute)
+        if datetime.datetime(daily.year, daily.month, daily.day, 0, 0, 0).isoweekday() == 6 and datetime.datetime(daily.year,daily.month,daily.day,0,0,0).isoweekday() == 7:
+            datetime.overtime = function.get_minute(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, off.hour, off.minute)
         if off.hour >= 17:
             if on.hour < 17:
                 daily.overtime = function.get_minute(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, off.hour, off.minute)-function.get_minute(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, 17, 0)
             else:
                 daily.overtime = function.get_minute(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, off.hour, off.minute)
-        elif datetime.datetime(daily.year, daily.month, daily.day, 0, 0, 0).isoweekday() == 6 and datetime.datetime(daily.year,daily.month,daily.day,0,0,0).isoweekday() == 7:
-            datetime.overtime = function.get_minute(daily.year, daily.month, daily.day, on.hour, on.minute, daily.year, daily.month, daily.day, off.hour, off.minute)
         else:
             daily.overtime = 0
         if datetime.datetime(daily.year, daily.month, daily.day, 0, 0, 0).isoweekday == 6:

@@ -27,7 +27,7 @@
             {% if request.session.is_hr %}
                 <a href="/hr/leave/{{leave.user_id.id}}/" class="btn btn-dark">回該員工假單</a>
             {% endif %}
-            {% if request.session.user_id == leave.user_id.id and leave.double_check == False%}
+            {% if request.session.user_id == leave.user_id.id %}
                 <a href="/leave/{{id}}/" class="btn btn-secondary">修改假卡</a>
             {% endif %}
             {% if request.session.is_manager or request.session.is_boss %}

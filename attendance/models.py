@@ -24,8 +24,9 @@ class User(models.Model):
     department = models.CharField(max_length=128)
     on_job = models.DateField(auto_now=False, auto_now_add=False, default=date.today)
     salary = models.PositiveIntegerField()
+    seniority = models.PositiveSmallIntegerField(default=0)
     annual = models.PositiveSmallIntegerField(default=0)
-    annual_left = models.PositiveSmallIntegerField(default=0)
+    annual_used = models.PositiveSmallIntegerField(default=0)
     #Deductible 
     labor = models.PositiveSmallIntegerField(default=1)
     health = models.PositiveSmallIntegerField(default=1)
@@ -78,7 +79,6 @@ class Leave(models.Model):
     category = models.CharField(max_length=64, choices=Reason.choices, default=Reason.特休)
     special = models.TextField(blank=True, null=True)
     checked = models.BooleanField(default=False)
-    double_check = models.BooleanField(default=False)
     #Meta
     class Meta:
         ordering = ['-start']
@@ -96,7 +96,6 @@ class Overtime(models.Model):
     double = models.PositiveSmallIntegerField(default=0, help_text='in hours')
     reason = models.CharField(max_length=256, blank=True, null=True)
     checked = models.BooleanField(default=False)
-    double_check = models.BooleanField(default=False)
     #Meta
     class Meta:
         ordering = ['-year', '-month', '-day']
@@ -117,8 +116,9 @@ class Daily(models.Model):
     leave_early = models.PositiveSmallIntegerField(default=0)
     attend_fixed = models.FloatField(default=0)
     overtime_fixed = models.PositiveSmallIntegerField(default=0)
+    can_overtime = models.PositiveSmallIntegerField(default=0)
     leave_early_fixed = models.PositiveSmallIntegerField(default=0)
-    holiday = models.CharField(max_length=256, blank=True, null=True)
+    holiday = models.PositiveSmallIntegerField(default=0)
     fixed_note = models.CharField(max_length=256, blank=True, null=True)
     check = models.BooleanField(default=False)
     #Meta
