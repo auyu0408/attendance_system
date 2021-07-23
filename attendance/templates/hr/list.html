@@ -23,6 +23,16 @@
                     {% endif %}
                 </a> 
                 {% endfor %}
+                {% if stops %}
+                    <h4 class="text-center"><br>留職停薪</h4>
+                    {% for stop in stops %}
+                    <a href ="{{href}}/{{stop.id}}/" class="list-group-item list-group-item-light list-group-item-action">
+                        {% if mode == "user" %}
+                        {{stop.department}}-{{stop.name}}
+                        {% endif %}
+                    </a> 
+                    {% endfor %}
+                {% endif %}
             </ul>
             <div class="list">
                 <br>

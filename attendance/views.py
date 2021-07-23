@@ -583,7 +583,8 @@ def hr_attendance(request, id=0):
         title = "請選擇員工"
         href = "/hr/attendance"
         back = "/hr/menu/"
-        objects = models.User.objects.all().exclude(name="admin")
+        objects = models.User.objects.filter(status=0).exclude(name="admin")
+        stops = models.User.objects.filter(status=2)
         return render(request, 'hr/list.html', locals())
     else:
         month_form = forms.MonthForm()
@@ -608,6 +609,7 @@ def hr_leave(request, id=0):
     if id == 0:
         mode = "user"
         objects = models.User.objects.filter(status=0).exclude(name="admin")
+        stops = models.User.objects.filter(status=2)
         title = "請選擇員工"
         href = "/hr/leave"
         back = "/hr/menu/"
@@ -636,7 +638,8 @@ def hr_overtime(request, id=0):
         return redirect("/index/")
     if id == 0:
         mode = "user"
-        objects = models.User.objects.all()
+        objects = models.User.objects.filter(status=0).exclude(name="admin")
+        stops = models.User.objects.filter(status=2)
         title = "請選擇員工"
         href = "/hr/overtime"
         back = "/hr/menu/"
@@ -693,6 +696,7 @@ def hr_checked(request):
     submit = "核對"
     return render(request, 'hr/daily_check.html', locals())
 
+
 def hr_salary(request): 
     if not request.session.get('is_hr', None):
         return redirect("/index/")
@@ -703,7 +707,7 @@ def hr_salary(request):
         if month_form.is_valid():
             year = month_form.cleaned_data.get('year')
             month = month_form.cleaned_data.get('month')
-            Users = models.User.objects.all().exclude(name="admin", status=1)
+            Users = models.User.objects.filter(status=0).exclude(name="admin")
             for user in Users:
                 try:
                     total = models.Total.objects.get(user_id__id=user.id, month=month, year=year)
@@ -844,7 +848,8 @@ def hr_salary(request):
         month_form = forms.MonthForm()
         action = "/hr/salary/"
         mode = "user"
-        objects = models.User.objects.all()
+        objects = models.User.objects.filter(status=0).exclude(name="admin")
+        stops = models.User.objects.filter(status=2)
         href = "/hr/list_total"
         back = "/hr/menu/"
         title = "請選擇員工"
