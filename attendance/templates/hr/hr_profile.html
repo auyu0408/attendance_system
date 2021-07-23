@@ -2,16 +2,29 @@
 <body>
     <div class="container">
         <div class="col list">
-            <h3 class="text-center"><br>員工列表</h3>
             <ul class="list-group list">
-                {% for user in users %}
-                <a href ="/hr/profile/{{user.id}}" class="list-group-item list-group-item-light list-group-item-action">{{user.name}}</a> 
-                {% endfor %}
+                {% if users %}
+                    <h3 class="text-center"><br>員工列表</h3>
+                    {% for user in users %}
+                    <a href ="/hr/profile/{{user.id}}" class="list-group-item list-group-item-light list-group-item-action">{{user.name}}</a> 
+                    {% endfor %}
+                {% endif %}
+                {% if stops %}
+                    <h4 class="text-center"><br>留職停薪</h4>
+                    {% for stop in stops %}
+                    <a href ="/hr/profile/{{stop.id}}" class="list-group-item list-group-item-light list-group-item-action">{{stop.name}}</a> 
+                    {% endfor %}
+                {% endif %}
+                {% if resigns %}
+                    <h3 class="text-center"><br>已離職人員</h3>
+                    {% for resign in resigns %}
+                    <a href ="/hr/profile_leave/{{resign.id}}/" class="list-group-item list-group-item-light list-group-item-action">{{resign.name}}</a> 
+                    {% endfor %}
+                {% endif %}
                 <div>
                     <br>
                     <a href="/hr/menu/" class="btn btn-info">回前頁</a>
                 </div>
-                
             </ul>
         </div>
     </div>

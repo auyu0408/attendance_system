@@ -26,7 +26,11 @@
             </ul>
             <div class="list">
                 <br>
+                {%if user.status != 1 %}
                 <a href="{{back}}" class="btn btn-info">回前頁</a>
+                {% else %}
+                <a href="/hr/profile_leave/{{user.id}}/" class="btn btn-info">回前頁</a>
+                {% endif %}
             </div>
         </div>
     </div>

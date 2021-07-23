@@ -23,6 +23,7 @@ class User(models.Model):
     email = models.EmailField(max_length=254, unique=True)
     department = models.CharField(max_length=128)
     on_job = models.DateField(auto_now=False, auto_now_add=False, default=date.today)
+    resign = models.DateField(auto_now=False, auto_now_add=False, default=date.today)
     salary = models.PositiveIntegerField()
     seniority = models.PositiveSmallIntegerField(default=0)
     annual = models.PositiveSmallIntegerField(default=0)
@@ -98,7 +99,7 @@ class Overtime(models.Model):
     checked = models.BooleanField(default=False)
     #Meta
     class Meta:
-        ordering = ['-year', '-month', '-day']
+        ordering = ['-year', '-month', 'day']
     #Methods
 
 class Daily(models.Model):
@@ -109,8 +110,8 @@ class Daily(models.Model):
     day = models.PositiveSmallIntegerField(default=0)
     on_time = models.TimeField(auto_now=False, auto_now_add=False, default=timezone.now)
     off_time = models.TimeField(auto_now=False, auto_now_add=False, default=timezone.now)
-    on_time_fixed = models.TimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
-    off_time_fixed = models.TimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
+    on_time_fixed = models.TimeField(auto_now=False, auto_now_add=False, default=timezone.now)
+    off_time_fixed = models.TimeField(auto_now=False, auto_now_add=False, default=timezone.now)
     attend = models.FloatField(default=0)
     overtime = models.PositiveSmallIntegerField(default=0)
     leave_early = models.PositiveSmallIntegerField(default=0)
@@ -119,6 +120,7 @@ class Daily(models.Model):
     can_overtime = models.PositiveSmallIntegerField(default=0)
     leave_early_fixed = models.PositiveSmallIntegerField(default=0)
     holiday = models.PositiveSmallIntegerField(default=0)
+    holiday_reason = models.CharField(max_length=256, blank=True, null=True)
     fixed_note = models.CharField(max_length=256, blank=True, null=True)
     check = models.BooleanField(default=False)
     #Meta

@@ -1,9 +1,11 @@
 # -*- coding: UTF-8 -*-
+from collections import namedtuple
 import datetime
 from django.core.checks import messages
 from django.http import request
 from django.http.response import HttpResponse
 from django.shortcuts import redirect, render
+from django.urls.conf import path
 from . import models
 from . import forms
 from django.contrib.auth.hashers import check_password, make_password
@@ -61,6 +63,7 @@ def change_passwd(request):
         return redirect("/login/")
     title = "修改密碼"
     back = "/index/"
+    mode = "/change_passwd/"
     #get 
     if request.method == 'POST':
         user = models.User.objects.get(id=request.session['user_id'])
@@ -379,6 +382,8 @@ def check(request):
                 except:
                     daily = models.Daily(year=leave.year, month=leave.month, day=leave.start.day, user_id=leave.user_id)
                 daily.holiday = leave.total_time
+                daily.holiday_reason = leave.category
+                daily.check = False
                 daily.save()
             else:
                 try:
@@ -386,6 +391,8 @@ def check(request):
                 except:
                     daily = models.Daily(year=leave.year, month=leave.month, day=leave.start.day, user_id=leave.user_id)
                 daily.holiday = function.get_hour(leave.year, leave.month, leave.start.day, leave.start.hour, leave.start.minute, leave.year, leave.month, leave.start.day, 17, 0)
+                daily.holiday_reason = leave.category
+                daily.check = False
                 daily.save()
                 for date in range(leave.start.day+1, leave.end.day):
                     try:
@@ -393,12 +400,15 @@ def check(request):
                     except:
                         daily = models.Daily(year=leave.year, month=leave.month, day=date, user_id=leave.user_id)
                     daily.holiday = 8
+                    daily.holiday_reason = leave.category
+                    daily.check = False
                     daily.save()
                 try:
                     daily = models.Daily.objects.get(year=leave.year, month=leave.month, day=leave.end.day, user_id=leave.user_id)
                 except:
                     daily = models.Daily(year=leave.year, month=leave.month, day=leave.end.day, user_id=leave.user_id)
                 daily.holiday = function.get_hour(leave.year, leave.month, leave.end.day, 8, 0, leave.year, leave.month, leave.end.day, leave.end.hour, leave.end.minute)
+                daily.check = False
                 daily.save()
             leave.checked = True
             leave.save()
@@ -409,8 +419,9 @@ def check(request):
             try:
                 daily = models.Daily.objects.get(year=overtime.year, month=overtime.month, day=overtime.day, user_id=overtime.user_id)
             except:
-                daily =models.Daily(year=overtime.year, month=overtime.month, day=overtime.day, user_id=overtime.user_id)
+                daily = models.Daily(year=overtime.year, month=overtime.month, day=overtime.day, user_id=overtime.user_id)
             daily.can_overtime = overtime.one_third + overtime.two_third + overtime.double
+            daily.save()
             overtime.save()
     return redirect(f"/display_{form_type}/{id}/")
 
@@ -434,8 +445,21 @@ def hr_menu(request):
 def hr_profile(request):
     if not request.session.get('is_hr', None):
         return redirect("/index/")
-    users = models.User.objects.all().exclude(name="admin")
+    users = models.User.objects.filter(status=0).exclude(name="admin")
+    stops = models.User.objects.filter(status=2)
     return render(request, 'hr/hr_profile.html', locals())
+
+def hr_profile_leave(request):
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
+    resigns = models.User.objects.filter(status=1)
+    return render(request, 'hr/hr_profile.html', locals())
+
+def resign(request, id):
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
+    user = models.User.objects.get(id=id)
+    return render(request, 'hr/resign.html', locals())
 
 def hr_personal(request, id):
     if not request.session.get('is_hr', None):
@@ -447,12 +471,15 @@ def hr_personal(request, id):
     back = "/hr/profile/"
     return render(request, 'login/profile.html', locals())
 
+
 def status(request, user, status):
     try:
         users = models.User.objects.get(id=user)
     except:
         return redirect("/hr/profile/")
     users.status = status
+    if status == 1:
+        users.resign = datetime.date.today()
     users.save()
     return redirect(f"/hr/profile/{user}")
 
@@ -550,7 +577,7 @@ def hr_register(request):
 
 def hr_attendance(request, id=0):
     if not request.session.get('is_hr', None):
-        return redirect("/index/")
+        return redirect("/attendance/")
     if id==0:
         mode = "user"
         title = "請選擇員工"
@@ -580,7 +607,7 @@ def hr_leave(request, id=0):
         return redirect("/index/")
     if id == 0:
         mode = "user"
-        objects = models.User.objects.all()
+        objects = models.User.objects.filter(status=0).exclude(name="admin")
         title = "請選擇員工"
         href = "/hr/leave"
         back = "/hr/menu/"
@@ -597,9 +624,9 @@ def hr_leave(request, id=0):
         action = f"/hr/leave/{id}/"
         submit = "送出"
         mode = "leave"
-        users = models.User.objects.get(id=id)
+        user = models.User.objects.get(id=id)
         objects = models.Leave.objects.filter(user_id=id, month=mon, year=year, checked=True)
-        title = f"{year}/{mon} {users.name}的已核准價單"
+        title = f"{year}/{mon} {user.name}的已核准價單"
         href = "/display_leave"
         back = "/hr/leave/"
         return render(request, 'hr/list.html', locals())
@@ -626,9 +653,9 @@ def hr_overtime(request, id=0):
         action = f"/hr/overtime/{id}/"
         submit = "送出"
         mode = "overtime"
-        users = models.User.objects.get(id=id)
+        user = models.User.objects.get(id=id)
         objects = models.Overtime.objects.filter(user_id=id, checked=True, month=mon, year=year)
-        title = f"{year}/{mon} {users.name}的已核准加班單"
+        title = f"{year}/{mon} {user.name}的已核准加班單"
         href = "/display_overtime"
         back = "/hr/overtime/"
         return render(request, 'hr/list.html', locals())
@@ -637,26 +664,36 @@ def hr_checked(request):
     if not request.session.get('is_hr', None):
         return redirect("/index/")
     month_form = forms.MonthForm()
+    mon = datetime.date.today().month
+    year = datetime.date.today().year
     if request.method == "POST":
         month_form = forms.MonthForm(request.POST)
         if month_form.is_valid():
             mon = month_form.cleaned_data.get('month')
             year = month_form.cleaned_data.get('year')
-        Leaves = models.Leave.objects.filter(year=year, month=mon, check=True, double_check=False)
-        for leave in Leaves:
-            for day in range(leave.start.day, leave.end.day):
-                try:
-                    daily = models.Daily.objects.get(year=year, month=mon, day=day, user_id=leave.user_id)
-                    if daily.leave_early < leave.total_time*60:
-                        leave.double
-                except:
-                    leave.double_check = False
-                if daily.overtime_fixed == overtime.one_third + overtime.two_third + overtime.double:
-                    overtime.double_check = True
-                overtime.double_check = False
-    return redirect("/login/")
+        dailys = models.Daily.objects.filter(year=year, month=mon, check=False)
+        for daily in dailys:
+            if daily.overtime_fixed <= daily.can_overtime:
+                if datetime.date(daily.year, daily.month, daily.day).isoweekday() == 6 or datetime.date(daily.year, daily.month, daily.day).isoweekday == 7:
+                    daily.check = True
+                elif int(daily.attend + round(daily.leave_early_fixed/60, 2)) >= 8:
+                    try:
+                        daily.overtime_fixed = int((8 - daily.holiday - daily.attend_fixed)*60)
+                    except:
+                        pass
+                    daily.check = True
+                    print(daily.overtime_fixed)
+                else:
+                    pass
+            else:
+                pass
+            daily.save()
+    wrongs = models.Daily.objects.filter(check=False)
+    action = "/hr/checked/"
+    submit = "核對"
+    return render(request, 'hr/daily_check.html', locals())
 
-def hr_salary(request):
+def hr_salary(request): 
     if not request.session.get('is_hr', None):
         return redirect("/index/")
     if not request.session.get('is_salary', None):
@@ -679,20 +716,60 @@ def hr_salary(request):
                     total.user_id = user
                 #overtime
                 Overtimes = models.Overtime.objects.filter(user_id__id=user.id, month=month, year=year, checked=True)
+                day_rate = float(user.salary)/float(30)
+                hour_rate = float(user.salary)/float(30*8)
+                minute_rate = float(hour_rate)/float(60)
+                all_time = 0
+                flag = 0
                 for overtime in Overtimes:
                     if datetime.datetime(overtime.year, overtime.month, overtime.day).isoweekday() == 6:
                         total.over_613 += overtime.one_third
                         total.over_623 += overtime.two_third
                         total.over_223 += overtime.double
+                        total.free_over += overtime.one_third + overtime.two_third + overtime.double
+                        total.free_over_add += overtime.one_third*(minute_rate*4/3) + overtime.two_third*(minute_rate*5/3) + overtime.double*(minute_rate*8/3)
                     elif datetime.datetime(overtime.year, overtime.month, overtime.day).isoweekday() == 7:
                         total.over_2 += overtime.double
+                        total.free_over += overtime.double
+                        total.free_over_add += overtime.double*(minute_rate*2)
                     else:
-                        total.over_13 += overtime.one_third
-                        total.over_23 += overtime.two_third
+                        if flag:
+                            total.tax_over += overtime.one_third
+                            total.tax_over_add += overtime.one_third*(minute_rate*4/3)
+                        else:
+                            all_time += overtime.one_third
+                            if all_time == 46*60:
+                                flag = 1
+                            elif all_time > 46*60:
+                                flag = 1
+                                tax = all_time - 46*60
+                                total.tax_over += tax
+                                total.free_over += overtime.one_third - tax
+                                total.tax_over_add += tax*(minute_rate*4/3)
+                                total.free_over_add += (overtime.one_third - tax)*(minute_rate*4/3)
+                            else:
+                                total.free_over += overtime.one_third
+                                total.free_over_add += overtime.one_third*(minute_rate*4/3)
+                        if flag:
+                            total.tax_over += overtime.two_third
+                            total.tax_over_add += overtime.two_third*(minute_rate*5/3)
+                        else:
+                            all_time += overtime.two_third
+                            if all_time == 46*60:
+                                flag = 1
+                            elif all_time > 46*60:
+                                flag = 1
+                                tax = all_time - 46*60
+                                total.tax_over += tax
+                                total.free_over += overtime.two_third - tax
+                                total.tax_over_add += tax*(minute_rate*4/3)
+                                total.free_over_add += (overtime.two_third - tax)*(minute_rate*4/3)
+                            else:
+                                total.free_over += overtime.two_third
+                                total.free_over_add += overtime.two_third*(minute_rate*4/3)
+                total.tax_over = round(total.tax_over/60,2)
+                total.free_over = round(total.free_over/60,2)
                 #leave
-                day_rate = float(user.salary)/float(30)
-                hour_rate = float(user.salary)/float(30*8)
-                minute_rate = float(hour_rate)/float(60)
                 Leaves = models.Leave.objects.filter(user_id__id=user.id, month=month, year=year, checked=True)
                 for leave in Leaves:
                     if leave.category == "病假":
@@ -751,21 +828,9 @@ def hr_salary(request):
                 total.total_leave = total_leave
                 user.annual_user += total_leave.annual
                 #late
-                Dailys = models.Daily.objects.filter(user_id__id=user.id, month=month, year=year)
-                leave_early = 0
+                Dailys = models.Daily.objects.filter(user_id__id=user.id, month=month, year=year, check=True)
                 for daily in Dailys:
-                    leave_early += daily.leave_early_fixed
-                total.leave_early = leave_early
-                if total.over_13 + total.over_23 > 46*60:
-                    total.tax_over = (total.over_13 + total.over_23 - 46*60)/60
-                    total.tax_over_add = (total.over_13 + total.over_23 - 46*60) * (minute_rate*5/3)
-                    total.free_over = (total.over_13+total.over_23+total.over_613+total.over_623+total.over_223+total.over_2-46*60)/60
-                    total.free_over_add = (total.over_13+total.over_613)*(minute_rate*4/3)  + (total.over_23+total.over_623-total.tax_over*60)*(minute_rate*5/3) + total.over_223*(minute_rate*8/3) + total.over2*minute_rate*2
-                else:
-                    total.tax_over = 0
-                    total.tax_over_add = 0
-                    total.free_over = round((total.over_13+total.over_23+total.over_613+total.over_623+total.over_223+total.over_2)/60,2)
-                    total.free_over_add = (total.over_13+total.over_613)*(minute_rate*4/3)  + (total.over_23+total.over_623)*(minute_rate*5/3) + total.over_223*(minute_rate*8/3) + total.over_2*minute_rate*2
+                    total.leave_early += daily.leave_early_fixed
                 decrease = total_leave.care_deduce + total_leave.sick_deduce +total_leave.other1_deduce + total_leave.other2_deduce + total_leave.other3_deduce + total_leave.other4_deduce + total_leave.unpaid_deduce + total_leave.nursery_deduce + total_leave.personal_deduce + total_leave.menstrual_deduce
                 decrease += total.leave_early * minute_rate
                 total.tax = user.salary - decrease + total.tax_over_add

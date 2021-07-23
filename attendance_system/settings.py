@@ -81,6 +81,17 @@ DATABASES = {
     }
 }
 
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.mysql',   # 数据库引擎
+#        'NAME': 'attendance',  # 数据库名，先前创建的
+#        'USER': 'ubuntu',     # 用户名，可以自己创建用户
+#        'PASSWORD': '',  # 密码
+#        'HOST': 'localhost',  # mysql服务所在的主机ip
+#        'PORT': '3306',         # mysql服务端口
+#    }
+#}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators

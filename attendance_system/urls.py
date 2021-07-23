@@ -49,6 +49,9 @@ urlpatterns = [
         path('menu/', views.hr_menu),
         path('profile/', views.hr_profile),
         path('profile/<int:id>/', views.hr_personal),
+
+        path('profile_leave/', views.hr_profile_leave),
+        path('profile_leave/<int:id>/', views.resign),
         path('status/<int:user>/<int:status>/', views.status),
 
         path('edit/<int:id>/', views.hr_edit),
@@ -61,6 +64,7 @@ urlpatterns = [
 
         path('overtime/', views.hr_overtime),
         path('overtime/<int:id>/', views.hr_overtime),
+        path('checked/',views.hr_checked),
 
         path('salary/', views.hr_salary),
         path('list_total/<int:userid>/',views.list_total),

@@ -1,0 +1,50 @@
+{%include "../templates.html"%}
+<body>
+    {%include "../hr/month.html"%}
+    <div class="container">
+        <div class="col">
+            <h4 class="text-center"><br>出勤異常或未核對</h4>
+            <div class="table">
+                <br>
+                <a href="/hr/menu/" class="btn btn-info">回前頁</a>
+            </div>
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th colspan="7" class="text-center">實際出勤資料</th>
+                        <th rowspan="2" class="text-center">核准加班</th>
+                        <th rowspan="2" class="text-center">請假時數</th>
+                        <th rowspan="2" class="text-center">備註</th>
+                        <th rowspan="2"></th>
+                    </tr>
+                    <tr>
+                        <th scope="col">Day</th>
+                        <th scope="col">名字</th>
+                        <th scope="col">實際上班</th>
+                        <th scope="col">實際下班</th>
+                        <th scope="col">實際出勤</th>
+                        <th scope="col">遲到早退</th>
+                        <th scope="col">實際加班</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for wrong in wrongs %}
+                    <tr>
+                        <td scope="col">{{wrong.month}}/{{wrong.day}}</td>
+                        <td scope="col">{{wrong.user_id.name}}</td>
+                        <td scope="col">{{wrong.on_time_fixed.hour}}:{% if wrong.on_time_fixed.minute < 10 %}0{% endif %}{{wrong.on_time_fixed.minute}}</td>
+                        <td scope="col">{{wrong.off_time_fixed.hour}}:{% if wrong.off_time_fixed.minute < 10 %}0{% endif %}{{wrong.off_time_fixed.minute}}</td>
+                        <td scope="col">{{wrong.attend_fixed}}時</td>
+                        <td scope="col">{{wrong.leave_early_fixed}}分</td>
+                        <td scope="col">{{wrong.overtime_fixed}}分</td>
+                        <td scope="col">{{wrong.can_overtime}}分</td>
+                        <td scope="col">{{wrong.holiday}}時, {{wrong.holiday_reason}}</td>
+                        <td scope="col">{{wrong.fixed_note}}</td>
+                        <td scope="col"><a href="/attendance/{{wrong.id}}/" class="btn btn-sm btn-info">修改</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>

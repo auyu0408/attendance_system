@@ -1,0 +1,19 @@
+{% include "../templates.html"%}
+<body>
+    <div class="container">
+        <div class="col">
+        <h4 class="text-center"><br>{{user.name}} 相關資料</h4>
+        <ul class="list-group list">
+            <a href='/hr/profile/{{user.id}}/' class="list-group-item list-group-item-light list-group-item-action">個人資料</a>
+            <a href='/hr/attendance/{{user.id}}/' class="list-group-item list-group-item-light list-group-item-action">出勤</a>
+            <a href='/hr/leave/{{user.id}}/' class="list-group-item list-group-item-light list-group-item-action">請假</a>
+            <a href='/hr/overtime/{{user.id}}/' class="list-group-item list-group-item-light list-group-item-action">加班</a>
+            <a href='/hr/list_total/{{user.id}}/' class="list-group-item list-group-item-light list-group-item-action">薪資紀錄</a>
+            <div>
+                <br>
+                <a href='/hr/profile_leave/' class="btn btn-info">回前頁</a>
+            </div>
+        </ul>
+        </div>
+    </div>
+</body>

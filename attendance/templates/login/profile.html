@@ -22,6 +22,11 @@
                 <tr>
                     <td>到職日:</td><td>{{user.on_job.year}},{{user.on_job.month}},{{user.on_job.day}}</td>
                 </tr>
+                {% if user.status == 1%}
+                <tr>
+                    <td>離職日:</td><td>{{user.resign.year}},{{user.resign.month}},{{user.resign.day}}</td>
+                </tr>
+                {% endif %}
                 <tr>
                     <td>特休:</td><td>{{user.annual}}日, 剩餘{{user.annual_left}}日</td>
                 </tr>
@@ -45,7 +50,11 @@
                     <td>自提撥:</td><td>{{user.retire_self}}</td>
                 </tr>
             </table>
+            {% if user.status != 1 %}
             <a href={{back}} class="btn btn-info">回前頁</a>
+            {% else %}
+            <a href="/hr/profile_leave/{{id}}/" class="btn btn-info">回前頁</a>
+            {% endif %}
             {% if back == "/index/" %}
                 <a href="/change_passwd/" class="btn btn-warning">更改密碼</a>
             {% endif %}

@@ -29,7 +29,7 @@
             {% if request.session.is_hr %}
                 <a href="/hr/overtime/{{overtime.user_id.id}}" class="btn btn-dark">回該員工假單</a>
             {% endif %}
-            {% if request.session.user_id == overtime.user_id.id and overtime.double_check == False %}
+            {% if request.session.user_id == overtime.user_id.id %}
                 <a href="/overtime/{{id}}/" class="btn btn-secondary">修改假卡</a>
             {% endif %}
             {% if request.session.is_manager or request.session.is_boss %}
