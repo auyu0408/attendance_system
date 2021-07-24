@@ -3,6 +3,9 @@
     <div class="container">
         <div class="col">
             <form class="form-register" action={{action}} method="post">
+                {% if message %}
+                    <div class="alert alert-danger">{{ message }}</div>
+                {% endif %}
                 {% csrf_token %}
                 <h3 class="text-center"><br>{{title}}</h3>
                 <div class="form-group">

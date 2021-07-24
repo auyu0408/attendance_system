@@ -5,7 +5,8 @@ from django.forms.widgets import CheckboxInput, TimeInput
 
 class SignUp(forms.Form):
     Department=(
-        ('業務部', '業務部'),
+        ('業務部1', '業務部1'),
+        ('業務部2', '業務部2'),
         ('人事部', '人事部'),
         ('會計部', '會計部'),
         ('管理部', 'BOSS'),

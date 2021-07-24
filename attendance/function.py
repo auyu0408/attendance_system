@@ -76,6 +76,9 @@ def get_day(sy,sb,sd,sh,sm,ey,eb,ed,eh,em):
         sm = 0
     if eh == 12:
         em = 0
+    if sh < 8:
+        sh = 8
+        sm = 0
     day1 = datetime.datetime(ey,eb,ed,eh,em,0)-datetime.datetime(sy,sb,sd,sh,sm,0)
     if day1.days < 0:
         return -1
@@ -97,6 +100,9 @@ def get_hour(sy,sb,sd,sh,sm,ey,eb,ed,eh,em):
         sm = 0
     if eh == 12:
         em = 0
+    if sh < 8:
+        sh = 8
+        sm = 0
     day1 = datetime.datetime(ey,eb,ed,eh,em,0)-datetime.datetime(sy,sb,sd,sh,sm,0)
     hour1 = round(float(day1.seconds)/3600,2)
     minute = (day1.seconds-hour1*3600)/60
@@ -110,6 +116,9 @@ def get_minute(sy,sb,sd,sh,sm,ey,eb,ed,eh,em):
         sm = 0
     if eh == 12:
         em = 0
+    if sh < 8:
+        sh = 8
+        sm = 0 
     day1 = datetime.datetime(ey,eb,ed,eh,em,0)-datetime.datetime(sy,sb,sd,sh,sm,0)
     minute = (day1.seconds)/60
     if sh <=12 and eh >12:

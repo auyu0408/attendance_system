@@ -103,25 +103,33 @@ def attendance(request):
 def daily(request, id=0):
     if not request.session.get('is_login', None):
         return redirect("/login/")
-    if id!=0:
-        daily = models.Daily.objects.get(id=id)
-    else:
-        daily = models.Daily()
     if request.method == 'POST':
         daily_form = forms.DailyForm(request.POST)
         if daily_form.is_valid():
-            daily.on_time_fixed = daily_form.cleaned_data.get('on_time_fixed')
-            daily.off_time_fixed = daily_form.cleaned_data.get('off_time_fixed')
-            daily.fixed_note = daily_form.cleaned_data.get('fixed_note')
-            daily.year = daily_form.cleaned_data.get('year')
-            daily.month = daily_form.cleaned_data.get('month')
-            daily.day = daily_form.cleaned_data.get('day')
+            year = daily_form.cleaned_data.get('year')
+            month = daily_form.cleaned_data.get('month')
+            day = daily_form.cleaned_data.get('day')
             user_name = daily_form.cleaned_data.get('name')
             try:
                 user = models.User.objects.get(name=user_name)
+                if user.id == request.session['user_id'] or request.session['is_hr']:
+                    pass
+                else:
+                    message = "請勿動他人資料"
+                    return render(request, "hr/edit_daily.html", locals())
             except:
                 message = "Wrong Name!"
                 return render(request, "hr/edit_daily.html", locals())
+            try:
+                daily = models.Daily.objects.get(year=year, month=month, day=day, user_id=user)
+            except:
+                daily = models.Daily()
+            daily.on_time_fixed = daily_form.cleaned_data.get('on_time_fixed')
+            daily.off_time_fixed = daily_form.cleaned_data.get('off_time_fixed')
+            daily.fixed_note = daily_form.cleaned_data.get('fixed_note')
+            daily.year = year
+            daily.month = month
+            daily.day = day
             daily.user_id = user
             #get time
             on = daily.on_time_fixed
@@ -145,13 +153,14 @@ def daily(request, id=0):
             else:
                 daily.leave_early_fixed = daily.leave_early_fixed
             daily.save()
-            message = "修改成功"
+            message = "登記成功"
             return render(request, "login/index.html", locals())
         else:
             message = "Wrong type."
             return render(request, "hr/edit_daily.html", locals())
     else:
         if id!=0:
+            daily = models.Daily.objects.get(id=id)
             daily_form = forms.DailyForm(initial={'name':daily.user_id.name, 'on_time_fixed':daily.on_time_fixed, 'off_time_fixed':daily.off_time_fixed,
                                         'year':daily.year, 'month':daily.month, 'day':daily.day,'fixed_note':daily.fixed_note,})
         else:
@@ -163,8 +172,10 @@ def leave(request,id=0):
         return redirect("/login/")
     if id!=0:
         leave = models.Leave.objects.get(id=id)
-        if leave.user_id.status != 0:
-            return redirect(f"/display_leave/{id}/") 
+        if leave.checked:
+            return redirect(f"/display_leave/{id}/")
+        if leave.user_id.id != request.session['user_id']:
+            return redirect("/leave_list/")
     else:
         leave = models.Leave()
     if request.method == 'POST':
@@ -197,9 +208,8 @@ def leave(request,id=0):
                 leave.user_id = models.User.objects.get(id=request.session['user_id'])
             #insert
             leave.save()
-            message = "申請成功"
             #redirect
-            return render(request, 'login/index.html', locals())
+            return redirect(f"/display_leave/{leave.id}")
     if id==0:
         leave_form = forms.LeaveForm()
     else:
@@ -230,17 +240,17 @@ def leave_list(request):
     return render(request, 'login/list.html', locals())
 
 def show_leave(request, id):
+    if not request.session.get('is_login', None):
+        return redirect("/login/")
     user = models.User.objects.get(id=request.session['user_id'])
     try:
         leave = models.Leave.objects.get(id=id)
     except:
         return redirect("/leave_list/")
-    if not request.session.get('is_login', None):
-        return redirect("/login/")
     if request.session['user_id'] == leave.user_id.id or (request.session['is_manager'] and user.department == leave.user_id.department) or request.session['is_hr']:
         return render(request, "login/display_leave.html", locals())
     else:
-        redirect("/leave_list/")
+        return redirect("/leave_list/")
 
 
 def overtime(request, id=0):
@@ -248,8 +258,10 @@ def overtime(request, id=0):
         return redirect("/login/")
     if id!=0:
         overtime = models.Overtime.objects.get(id=id)
-        if overtime.user_id.status != 0:
+        if overtime.checked:
             return redirect(f"/display_overtime/{id}")
+        if overtime.user_id.id != request.session['user_id']:
+            return redirect(f"/overtime_list/")
     else:
         overtime = models.Overtime()
     if request.method == 'POST':
@@ -281,6 +293,8 @@ def overtime(request, id=0):
                     overtime.two_third = total_minute-120
                     overtime.double = 0
                 else:
+                    if date.isoweekday() != 6:
+                        message = "超過平日加班時間"
                     overtime.one_third = 120
                     overtime.two_third = 360
                     overtime.double = total_minute - 480
@@ -334,15 +348,14 @@ def show_overtime(request, id):
     if request.session['user_id'] == overtime.user_id.id or (request.session['is_manager'] and user.department == overtime.user_id.department) or request.session['is_hr']:
         return render(request, "login/display_overtime.html", locals())
     else:
-        redirect("/leave_list/")
+        return redirect("/overtime_list/")
 
 
 def check_list(request):
     if not request.session.get('is_login', None):
         return redirect("/login/")
     if not request.session.get('is_manager', None) and not request.session.get('is_boss', None):
-        message = "您沒有權限"
-        return render(request, 'login/index.html', {'message':message})
+        return redirect("/index/")
     user = models.User.objects.get(id=request.session['user_id'])
     month_form = forms.MonthForm()
     year = datetime.datetime.today().year
@@ -486,6 +499,15 @@ def status(request, user, status):
 def hr_edit(request, id):
     if not request.session.get('is_hr', None):
         return redirect("/index/")
+    func = "edit"
+    title = "修改資料"
+    action = f"/hr/edit/{id}/"
+    user = models.User.objects.get(id=id)
+    register_form = forms.SignUp(initial={'name':user.name, 'email':user.email, 'user_id':user.user_id,
+                        'passwd':user.passwd, 'department':user.department,
+                        'on_job':user.on_job, 'salary':user.salary, 'boss':user.boss, 'hr':user.hr,
+                        'manager':user.manager, 'staff':user.staff, 'self_percent':user.self_percent,})
+    back = f"/hr/profile/{user.id}/"
     if request.method == 'POST':
         register_form = forms.SignUp(request.POST)
         if register_form.is_valid():
@@ -504,20 +526,17 @@ def hr_edit(request, id):
             user.labor = function.find_labor(user.salary)
             user.health = function.find_health(user.salary)
             user.retirement = function.find_retirement(user.salary)
+            #retire self
+            if user.self_percent <= 6:
+                pass
+            else:
+                message = "自提撥最高是6％"
+                return render(request, 'hr/register.html', locals())
             user.retire_self = function.retire_M(user.retirement)*user.self_percent/100
             user.seniority = function.get_seniority(user.on_job.year, user.on_job.month, user.on_job.day)
             user.annual = function.get_annual(user.seniority)
             user.save()
             return redirect(f'/hr/profile/{user.id}/')
-    func = "edit"
-    title = "修改資料"
-    action = f"/hr/edit/{id}/"
-    user = models.User.objects.get(id=id)
-    register_form = forms.SignUp(initial={'name':user.name, 'email':user.email, 'user_id':user.user_id,
-                        'passwd':user.passwd, 'department':user.department,
-                        'on_job':user.on_job, 'salary':user.salary, 'boss':user.boss, 'hr':user.hr,
-                        'manager':user.manager, 'staff':user.staff, 'retire_self':user.self_percent,})
-    back = f"/hr/profile/{user.id}/"
     return render(request, 'hr/register.html', locals())
 
 def hr_register(request):
@@ -560,6 +579,12 @@ def hr_register(request):
             new_User.labor = function.find_labor(new_User.salary)
             new_User.health = function.find_health(new_User.salary)
             new_User.retirement = function.find_retirement(new_User.salary)
+                        #retire self
+            if new_User.self_percent <= 6:
+                pass
+            else:
+                message = "自提撥最高是6％"
+                return render(request, 'hr/register.html', locals())
             new_User.retire_self = function.retire_M(new_User.retirement)*new_User.self_percent/100
             new_User.seniority = function.get_seniority(new_User.on_job.year, new_User.on_job.month, new_User.on_job.day)
             new_User.annual = function.get_annual(new_User.seniority)
@@ -628,7 +653,7 @@ def hr_leave(request, id=0):
         mode = "leave"
         user = models.User.objects.get(id=id)
         objects = models.Leave.objects.filter(user_id=id, month=mon, year=year, checked=True)
-        title = f"{year}/{mon} {user.name}的已核准價單"
+        title = f"{year}/{mon} {user.name}的已核准假單"
         href = "/display_leave"
         back = "/hr/leave/"
         return render(request, 'hr/list.html', locals())

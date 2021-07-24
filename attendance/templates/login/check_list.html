@@ -3,34 +3,34 @@
     {%include "../hr/month.html"%}
     <div class="container">
         <div class="col list">
-            <h3 class="text-center"><br>未核准假單</h3>
+            <div>
+                <br>
+                <a href="/index/" class="btn btn-info">回前頁</a>
+            </div>
+            <h3 class="text-center"><br>{{year}}/{{mon}}未核准假單</h3>
             <ul class="list-group list">
                 {% for n_leave in n_leaves %}
                 <a href ="/display_leave/{{n_leave.id}}/" class="list-group-item list-group-item-light list-group-item-action">{{n_leave.user_id.name}} 請假日:{{n_leave.start.month}}/{{n_leave.start.day}}</a> 
                 {% endfor %}
             </ul>
-            <h3 class="text-center"><br>未核准加班單</h3>
+            <h3 class="text-center"><br>{{year}}/{{mon}}未核准加班單</h3>
             <ul class="list-group list">
                 {% for n_overtime in n_overtimes %}
                 <a href ="/display_overtime/{{n_overtime.id}}/" class="list-group-item list-group-item-light list-group-item-action">{{n_overtime.user_id.name}} 請假日:{{n_overtime.month}}/{{n_overtime.day}}</a> 
                 {% endfor %}
             </ul>
-            <h3 class="text-center"><br>已核准假單</h3>
+            <h3 class="text-center"><br>{{year}}/{{mon}}已核准假單</h3>
             <ul class="list-group list">
                 {% for leave in leaves %}
                 <a href ="/display_leave/{{leave.id}}/" class="list-group-item list-group-item-light list-group-item-action">{{leave.user_id.name}} 請假日:{{leave.start.month}}/{{leave.start.day}}</a> 
                 {% endfor %}
             </ul>
-            <h3 class="text-center"><br>已核准加班單</h3>
+            <h3 class="text-center"><br>{{year}}/{{mon}}已核准加班單</h3>
             <ul class="list-group list">
                 {% for overtime in overtimes %}
                 <a href ="/display_overtime/{{overtime.id}}/" class="list-group-item list-group-item-light list-group-item-action">{{overtime.user_id.name}} 請假日:{{overtime.month}}/{{overtime.day}}</a> 
                 {% endfor %}
             </ul>
-            <div>
-                <br>
-                <a href="/index/" class="btn btn-info">回前頁</a>
-            </div>
         </div>
     </div>
 </body>

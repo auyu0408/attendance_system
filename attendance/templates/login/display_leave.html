@@ -20,26 +20,42 @@
                 </tr>
                 <tr>
                     <td>是否核准:</td><td>{% if leave.checked %}是{% else %}否{% endif %}</td>
-                    <td>已核銷:</td><td>{% if leave.double_check %}是{% else %}否{% endif %}</td>
+                    <td></td><td></td>
                 </tr>
             </table>
-            <a href="/leave_list/" class="btn btn-info">回假單頁</a>
+            {% if request.session.user_id == leave.user_id.id %}
+                <a href="/leave_list/" class="btn btn-info">回假單頁</a>
+            {% endif %}
+            {% if request.session.is_manager %}
+                <a href="/check_list/" class="btn btn-info">回核准頁</a>
+            {% endif %}
             {% if request.session.is_hr %}
                 <a href="/hr/leave/{{leave.user_id.id}}/" class="btn btn-dark">回該員工假單</a>
             {% endif %}
-            {% if request.session.user_id == leave.user_id.id %}
+            {% if request.session.user_id == leave.user_id.id and leave.checked == False %}
                 <a href="/leave/{{id}}/" class="btn btn-secondary">修改假卡</a>
             {% endif %}
-            {% if request.session.is_manager or request.session.is_boss %}
-            {% if leave.checked == False %}
-                <form action="/check/" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="form_id" value="{{leave.id}}">
-                    <input type="hidden" name="form_type" value="leave">
-                    <br>
-                    <button type="submit" class="btn btn-warning">核准</button>
-                </form>
+            {% if leave.user_id.manager and request.session.is_boss %}
+                {% if leave.checked == False %}
+                    <form action="/check/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_id" value="{{leave.id}}">
+                        <input type="hidden" name="form_type" value="leave">
+                        <br>
+                        <button type="submit" class="btn btn-warning">核准</button>
+                    </form>
+                {% endif %}
             {% endif %}
+            {% if leave.user_id.manager == False and request.session.is_manager %}
+                {% if leave.checked == False %}
+                    <form action="/check/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_id" value="{{leave.id}}">
+                        <input type="hidden" name="form_type" value="leave">
+                        <br>
+                        <button type="submit" class="btn btn-warning">核准</button>
+                    </form>
+                {% endif %}
             {% endif %}
         </div>
     </div>

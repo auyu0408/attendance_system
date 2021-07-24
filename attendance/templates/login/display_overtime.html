@@ -22,26 +22,37 @@
                 </tr>
                 <tr>
                     <td>是否核准:</td><td>{% if overtime.checked %}是{% else %}否{% endif %}</td>
-                    <td>已核銷:</td><td>{% if overtime.double_check %}是{% else %}否{% endif %}</td>
+                    <td></td><td></td>
                 </tr>
             </table>
             <a href="/overtime_list/" class="btn btn-info">回假單頁</a>
             {% if request.session.is_hr %}
                 <a href="/hr/overtime/{{overtime.user_id.id}}" class="btn btn-dark">回該員工假單</a>
             {% endif %}
-            {% if request.session.user_id == overtime.user_id.id %}
+            {% if request.session.user_id == overtime.user_id.id and overtime.checked == False %}
                 <a href="/overtime/{{id}}/" class="btn btn-secondary">修改假卡</a>
             {% endif %}
-            {% if request.session.is_manager or request.session.is_boss %}
-            {% if overtime.checked == False %}
-                <form action="/check/" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="form_id" value="{{overtime.id}}">
-                    <input type="hidden" name="form_type" value="overtime">
-                    <br>
-                    <button type="submit" class="btn btn-warning">核准</button>
-                </form>
+            {% if overtime.user_id.manager and request.session.is_boss %}
+                {% if overtime.checked == False %}
+                    <form action="/check/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_id" value="{{overtime.id}}">
+                        <input type="hidden" name="form_type" value="overtime">
+                        <br>
+                        <button type="submit" class="btn btn-warning">核准</button>
+                    </form>
+                {% endif %}
             {% endif %}
+            {% if overtime.user_id.manager == False and request.session.is_manager %}
+                {% if overtime.checked == False %}
+                    <form action="/check/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_id" value="{{overtime.id}}">
+                        <input type="hidden" name="form_type" value="overtime">
+                        <br>
+                        <button type="submit" class="btn btn-warning">核准</button>
+                    </form>
+                {% endif %}
             {% endif %}
         </div>
     </div>

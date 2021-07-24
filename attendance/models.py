@@ -11,7 +11,8 @@ import time
 class User(models.Model):
     #Fields
     class Department(models.TextChoices):
-        業務部 = '業務部'
+        業務部1 = '業務部1'
+        業務部2 = '業務部2'
         人事部 = '人事部'
         會計部 = '會計部'
         admin = 'admin'
@@ -82,7 +83,7 @@ class Leave(models.Model):
     checked = models.BooleanField(default=False)
     #Meta
     class Meta:
-        ordering = ['-start']
+        ordering = ['-year', '-month', 'start']
     #Methods
 
 class Overtime(models.Model):

@@ -2,6 +2,9 @@
 <body>
     <div class="container">
         <div class="col table-group">
+            {% if message %}
+                    <div class="alert alert-success">{{ message }}</div>
+            {% endif %}
             <h3 class="text-center"><br>個人資料</h3>
             <table class="table table-secondary table-hover table-responsive">
                 <tr>
@@ -47,7 +50,7 @@
             <table class="table table-secondary table-hover table-responsive">
                 <tr>
                     <td>生效日期:</td><td>{{user.on_job.year}},{{user.on_job.month}},{{user.on_job.day}}</td><td>等級：</td><td>{{user.retirement}}</td>
-                    <td>自提撥:</td><td>{{user.retire_self}}</td>
+                    <td>自提撥:</td><td>{{user.retire_self}} ({{user.self_percent}}%)</td>
                 </tr>
             </table>
             {% if user.status != 1 %}
