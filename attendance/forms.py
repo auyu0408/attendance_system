@@ -61,8 +61,8 @@ class OvertimeForm(forms.Form):
     year = forms.IntegerField(label="年", widget=forms.TextInput(attrs={'class':'form-control', 'autofocus':''}))
     month = forms.IntegerField(label="月", widget=forms.TextInput(attrs={'class':'form-control'}))
     day = forms.IntegerField(label="日", widget=forms.TextInput(attrs={'class':'form-control'}))
-    start = forms.TimeField(label="start time", widget=forms.DateTimeInput(attrs={'class':'form-control'}))
-    end = forms.TimeField(label="end time", widget=forms.DateTimeInput(attrs={'class':'form-control'}))
+    start = forms.TimeField(label="start time", widget=forms.TimeInput(attrs={'class':'form-control'}))
+    end = forms.TimeField(label="end time", widget=forms.TimeInput(attrs={'class':'form-control'}))
     reason = forms.CharField(label="原因", widget=forms.TextInput(attrs={'class':'form-control'}), required=False)
 
 class Passwd(forms.Form):
@@ -71,8 +71,8 @@ class Passwd(forms.Form):
 
 class DailyForm(forms.Form):
     name = forms.CharField(label="Name", widget=forms.TextInput(attrs={'class':'form-control', 'autofocus':''}))
-    on_time_fixed = forms.TimeField(label="上班時間(實際)", widget=forms.TimeInput(attrs={'class':'form-control'}), required=False)
-    off_time_fixed = forms.TimeField(label="下班時間(實際)",widget=forms.TimeInput(attrs={'class':'form-control'}), required=False)
+    on_time_fixed = forms.TimeField(label="上班時間(實際)", widget=forms.TimeInput(attrs={'class':'form-control'}))
+    off_time_fixed = forms.TimeField(label="下班時間(實際)",widget=forms.TimeInput(attrs={'class':'form-control'}))
     fixed_note = forms.CharField(label="備註", widget=forms.TextInput(attrs={'class':'form-control'}), required=False)
     year = forms.IntegerField(label="年", widget=forms.TextInput(attrs={'class':'form-control', 'autofocus':''}))
     month = forms.IntegerField(label="月", widget=forms.TextInput(attrs={'class':'form-control'}))

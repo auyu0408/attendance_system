@@ -6,25 +6,31 @@
             <table class="table table-secondary table-hover table-responsive">
                 <tr>
                     <td>姓名:</td><td>{{overtime.user_id.name}}</td>
-                    <td>時間:</td><td>{{overtime.year}}/{{overtime.month}}/{{overtime.day}} {{overtime.start}}~{{overtime.end}}</td>
-                </tr>
-                <tr>
-                    <td>第一階段加班</td><td>{{overtime.one_third}}分</td>
-                    <td>第二階段加班</td><td>{{overtime.two_third}}分</td>
-                </tr>
-                <tr>
-                    <td>第三階段加班</td><td>{{overtime.double}}分</td>
-                    <td></td><td></td>
-                </tr>
-                <tr>
-                    <td>原因:</td><td>{{overtime.reason}}</td>
-                    <td></td><td></td>
-                </tr>
-                <tr>
-                    <td>是否核准:</td><td>{% if overtime.checked %}是{% else %}否{% endif %}</td>
-                    <td></td><td></td>
+                    <td>預計時間:</td><td>{{overtime.year}}/{{overtime.month}}/{{overtime.day}} {{overtime.start.hour}}~{{overtime.end}}</td>
+                    <tr>
+                        <td>原因:</td><td>{{overtime.reason}}</td>
+                        <td></td><td></td>
+                    </tr>
+                    <tr>
+                        <td>是否核准:</td><td>{% if overtime.checked %}是{% else %}否{% endif %}</td>
+                        <td></td><td></td>
+                    </tr>
                 </tr>
             </table>
+            {% if request.session.is_hr %}
+            <h4 class="text-center">實際狀況</h4>
+            <table class="table table-secondary table-hover table-responsive">
+                <tr>
+                    <td>第一階段(實際)加班</td><td>{{overtime.one_third}}分</td>
+                    <td>第二階段(實際)加班</td><td>{{overtime.two_third}}分</td>
+                </tr>
+                <tr>
+                    <td>第三階段(實際)加班</td><td>{{overtime.double}}分</td>
+                    <td></td><td></td>
+                </tr>
+                </tr>
+            </table>
+            {% endif %}
             <a href="/overtime_list/" class="btn btn-info">回假單頁</a>
             {% if request.session.is_hr %}
                 <a href="/hr/overtime/{{overtime.user_id.id}}" class="btn btn-dark">回該員工假單</a>

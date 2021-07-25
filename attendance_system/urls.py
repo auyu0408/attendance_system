@@ -20,6 +20,7 @@ from attendance import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.index),
     path('index/', views.index),
     path('login/', views.login),
     path('profile/', views.profile),

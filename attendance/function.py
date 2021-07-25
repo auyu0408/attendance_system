@@ -68,31 +68,30 @@ def get_annual(seniority):
     return day
 
 def get_day(sy,sb,sd,sh,sm,ey,eb,ed,eh,em):
-    if sy == ey and sb == eb:
+    if ed < sd:
+        return -1
+    day = 0
+    for date in range(sd, ed+1):
+        if datetime.date(sy, sb, date).isoweekday() == 6 or datetime.date(sy, sb, date).isoweekday() == 7:
+            pass
+        else:
+            day += 1
+    day = day-2
+    hour1 = get_hour(sy,sb,sd,sh,sm,sy,sb,sd,17,0)
+    hour2 = get_hour(ey,eb,ed,8,0,ey,eb,ed,eh,em)
+    if hour1 + 0.5 > int(hour1)+1:
+        hour1 = int(hour1)+1
+    elif hour1+0.5 > int(hour1)+0.5:
+        hour1 = int(hour1)+0.5
+    else:
         pass
+    if hour2 + 0.5 > int(hour2)+1:
+        hour2 = int(hour2)+1
+    elif hour2+0.5 > int(hour2)+0.5:
+        hour2 = int(hour2)+0.5
     else:
-        return -1
-    if sh == 12:
-        sm = 0
-    if eh == 12:
-        em = 0
-    if sh < 8:
-        sh = 8
-        sm = 0
-    day1 = datetime.datetime(ey,eb,ed,eh,em,0)-datetime.datetime(sy,sb,sd,sh,sm,0)
-    if day1.days < 0:
-        return -1
-    hour = day1.seconds/60/60
-    minute = (day1.seconds-hour*3600)/60
-    if minute > 30:
-        hour = hour + 1
-    elif minute > 0:
-        hour = hour + 0.5
-    else:
-        hour = hour
-    if sh <=12 and eh >12:
-        hour = hour - 1
-    day = day1.days + round(float(hour)/float(8),2)
+        pass
+    day += round((hour1+hour2)/8,2)
     return day
 
 def get_hour(sy,sb,sd,sh,sm,ey,eb,ed,eh,em):
@@ -100,9 +99,6 @@ def get_hour(sy,sb,sd,sh,sm,ey,eb,ed,eh,em):
         sm = 0
     if eh == 12:
         em = 0
-    if sh < 8:
-        sh = 8
-        sm = 0
     day1 = datetime.datetime(ey,eb,ed,eh,em,0)-datetime.datetime(sy,sb,sd,sh,sm,0)
     hour1 = round(float(day1.seconds)/3600,2)
     minute = (day1.seconds-hour1*3600)/60
@@ -116,14 +112,40 @@ def get_minute(sy,sb,sd,sh,sm,ey,eb,ed,eh,em):
         sm = 0
     if eh == 12:
         em = 0
-    if sh < 8:
-        sh = 8
-        sm = 0 
     day1 = datetime.datetime(ey,eb,ed,eh,em,0)-datetime.datetime(sy,sb,sd,sh,sm,0)
     minute = (day1.seconds)/60
     if sh <=12 and eh >12:
         minute -= 60
     return minute
+
+def get_attend(sh,sm,eh,em):
+    if sh == 12:
+        sm = 0
+    if eh == 12:
+        em = 0
+    if sh < 8:
+        sh = 8
+        sm = 0
+    elif sh >= 17:
+        sh = 17
+        sm = 0
+    else:
+        pass
+    if eh < 8:
+        eh = 8
+        em = 0
+    elif eh >= 17:
+        eh = 17
+        em = 0
+    else:
+        pass
+    day1 = datetime.datetime(2000,1,1,eh,em,0)-datetime.datetime(2000,1,1,sh,sm,0)
+    hour1 = round(float(day1.seconds)/3600,2)
+    minute = (day1.seconds-hour1*3600)/60
+    if sh <=12 and eh >12:
+        hour1 = hour1 - 1
+    hour = hour1 + day1.days*8
+    return hour
 
 def get_weekend(sy,sb,sd,sh,sm,ey,eb,ed,eh,em):
     if sh == 12:
@@ -141,5 +163,5 @@ def get_weekend(sy,sb,sd,sh,sm,ey,eb,ed,eh,em):
 #print (find_labor(80000), find_health(80000), find_retirement(80000))
 #print (convert_labor(find_labor(80000)), convert_health(find_health(80000)), convert_retirement(find_retirement(80000)))
 #print (get_annual(1997,7,17))
-#print(get_annual(get_seniority(2000,1,22)))
-#print(int(4.83))        
+#print(get_day(2021,7,25,8,0,2021,7,25,10,00))
+#print(int(4.83))
