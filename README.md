@@ -16,25 +16,36 @@ python manage.py runserver
 
 ### Set admin
 - Login panel:
-  - at first, you don't have any  user, click here to add an admin.  
+  - at first, you don't have any  user, click here to add an admin.
+    ![](https://i.imgur.com/Iuev2yx.png)
   - default account:  
     -  ID: `admin`  
     -  password: `admin`  
   - only thing you can change is admin's password.  
 - index menu
   - after, you login with admin, you can see:  
+    ![](https://i.imgur.com/3u5fFqG.png)
   - you can create new user with `人事>人事資料建檔` or URLpath: `/hr/register/`
   - you need to have hr identity when you want to enter any hr pages.
-- salary
-  - 和薪資相關的菇能需要輸入薪資密碼才能觀看，薪資密碼即是admin密碼，可更改  
+- hr menu
+  - 和薪資相關的功能需要輸入薪資密碼才能觀看，薪資密碼即是admin密碼，可更改  
+  - 打卡功能是只要輸入ID即可打卡，概念是可以接讀卡機抓卡號
+    ![](https://i.imgur.com/3Q1MM5a.png)
 ### Identity:  
 - there have four kinds of identity, boss, hr, manager, staff
 - there also have some department, such as: 業務部1, 業務部2, 人事部, 會計部, boss
 - 以下是各個身份的界面
   - staff
+    ![](https://i.imgur.com/aspt7Fj.png)
   - manager
+    ![](https://i.imgur.com/od5ReIh.png)
   - hr
+    ![](https://i.imgur.com/EUcgzEK.png)
   - boss
+    ![](https://i.imgur.com/RC6TCJj.png)
 - manager 能看到的假單和加班單是自己部門底下的職員，boss則能看到manager身份的
 - manager不能批准自己的假單和加班單，boss可以
 - admin有staff, manager和hr的身份
+## Materia  
+
+- [self](https://github.com/auyu0408)
