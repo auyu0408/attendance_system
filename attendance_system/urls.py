@@ -75,6 +75,7 @@ urlpatterns = [
         path('change_passwd/', views.hr_passwd),
 
         path('set_day_off/', views.day_off),
+        path('delete_off/<int:id>/', views.delete_off),
     ])),
 
     path('check_in_out/', views.check_in_out),

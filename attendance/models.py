@@ -254,3 +254,5 @@ class Calender(models.Model):
         七 = '例假日'
     day = DateField(auto_now=False, auto_now_add=False, default=date.today)
     sort = CharField(max_length=28, choices=Sort.choices, default=Sort.六)
+    class Meta:
+        ordering = ['day']

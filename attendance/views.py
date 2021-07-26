@@ -215,7 +215,13 @@ def leave(request,id=0):
             leave.special = leave_form.cleaned_data.get('special')
             leave.checked = False
             #get total time
-            leave.total = function.get_day(s.year, s.month, s.day, s.hour, s.minute, e.year, e.month, e.day, e.hour, e.minute)
+            if leave.month >12:
+                message = "日期格式錯誤"
+                return render(request, 'login/leave.html', locals())
+            leave.total = function.get_day(s.year, s.month, s.day, s.hour, s.minute, e.year, e.month, e.day, e.hour, e.minute)                
+            if leave.total < 0:
+                message = "時間格式錯誤"
+                return render(request, 'login/leave.html', locals())
             leave.total_time = leave.total*8
             #get user
             if id==0:
@@ -224,6 +230,9 @@ def leave(request,id=0):
             leave.save()
             #redirect
             return redirect(f"/display_leave/{leave.id}")
+        else:
+            message ="格式錯誤"
+            return render(request, 'login/leave.html', locals())
     if id==0:
         leave_form = forms.LeaveForm()
     else:
@@ -291,8 +300,17 @@ def overtime(request, id=0):
             overtime.end = e
             overtime.reason = overtime_form.cleaned_data.get('reason')
             # get time
-            date = datetime.datetime(overtime.year, overtime.month, overtime.day)
-            if date.isoweekday() == 7:
+            try:
+                date = datetime.date(overtime.year, overtime.month, overtime.day)
+            except:
+                message = "日期格式錯誤"
+                return render(request, 'login/overtime.html', locals())
+            try:
+                calender_day = models.Calender.objects.get(day=date)
+            except:
+                calender_day = models.Calender()
+                calender_day.sort = "五"
+            if calender_day.sort == "日":
                 overtime.double = function.get_minute(overtime.year, overtime.month, overtime.day, s.hour, s.minute, overtime.year, overtime.month, overtime.day, e.hour, e.minute)
                 overtime.one_third = 0
                 overtime.two_third = 0
@@ -307,7 +325,7 @@ def overtime(request, id=0):
                     overtime.two_third = total_minute-120
                     overtime.double = 0
                 else:
-                    if date.isoweekday() != 6:
+                    if calender_day.sort != "六":
                         message = "超過平日加班時間"
                     overtime.one_third = 120
                     overtime.two_third = 360
@@ -405,7 +423,6 @@ def check(request):
         if form_type == "leave":
             leave = models.Leave.objects.get(id=id)
             day = leave.end.day - leave.start.day
-            print(day)
             if day == 0:
                 try:
                     daily = models.Daily.objects.get(year=leave.year, month=leave.month, day=leave.start.day, user_id=leave.user_id)
@@ -425,8 +442,13 @@ def check(request):
                 daily.check = False
                 daily.save()
                 for date in range(leave.start.day+1, leave.end.day):
-                    if datetime.date(leave.year, leave.month, date).isoweekday() == 6 or datetime.date(leave.year, leave.month, date).isoweekday() == 7:
-                        break
+                    try:
+                        calender_day = models.Calender.objects.get(day=datetime.date(leave.year,leave.month, date))
+                    except:
+                        calender_day = models.Calender()
+                        calender_day.sort = "五"
+                    if calender_day.sort != "五":
+                        continue
                     try:
                         daily = models.Daily.objects.get(year=leave.year, month=leave.month, day=date, user_id=leave.user_id)
                     except:
@@ -724,7 +746,12 @@ def hr_checked(request):
                 overtime = models.Overtime.objects.get(year=daily.year, month=daily.month, day=daily.day, user_id=daily.user_id)
             except:
                 pass
-            if datetime.date(daily.year,daily.month,daily.day).isoweekday() == 6:
+            try:
+                calender_day = models.Calender.objects.get(day=datetime.date(daily.year, daily.month, daily.day))
+            except:
+                calender_day = models.Calender
+                calender_day.sort = "五"
+            if calender_day.sort == "六":
                 if daily.overtime_fixed == daily.can_overtime:
                     pass
                 elif daily.overtime_fixed < daily.can_overtime:
@@ -743,7 +770,7 @@ def hr_checked(request):
                     daily.can_overtime = daily.overtime_fixed
                     overtime.save()
                 else: continue
-            elif datetime.date(daily.year, daily.month,daily.day).isoweekday() == 7:
+            elif calender_day.sort == "日":
                 print(0)
                 if daily.overtime_fixed == daily.can_overtime:
                     pass
@@ -819,13 +846,18 @@ def hr_salary(request):
                 all_time = 0
                 flag = 0
                 for overtime in Overtimes:
-                    if datetime.datetime(overtime.year, overtime.month, overtime.day).isoweekday() == 6:
+                    try:
+                        day = models.Calender.objects.get(day=datetime.date(overtime.year,overtime.month,overtime.day))
+                    except:
+                        day = models.Calender()
+                        day.sort = "五"
+                    if day.sort == "六":
                         total.over_613 += overtime.one_third
                         total.over_623 += overtime.two_third
                         total.over_223 += overtime.double
                         total.free_over += overtime.one_third + overtime.two_third + overtime.double
                         total.free_over_add += overtime.one_third*(minute_rate*4/3) + overtime.two_third*(minute_rate*5/3) + overtime.double*(minute_rate*8/3)
-                    elif datetime.datetime(overtime.year, overtime.month, overtime.day).isoweekday() == 7:
+                    elif day.sort == "日":
                         total.over_2 += overtime.double
                         total.free_over += overtime.double
                         total.free_over_add += overtime.double*(minute_rate*2)
@@ -1099,4 +1131,29 @@ def day_off(request):
     if not request.session.get('is_hr', None):
         return redirect("/index/")
     day_form = forms.DayForm()
+    if request.method == "POST":
+        day_form = forms.DayForm(request.POST)
+        if day_form.is_valid():
+            day = day_form.cleaned_data.get('day')
+            sort = day_form.cleaned_data.get('sort')
+            try:
+                day_off = models.Calender.objects.get(day=day)
+            except:
+                day_off = models.Calender()
+            day_off.day = day
+            day_off.sort = sort
+            day_off.save()
+        else:
+            message = "Wrong type"
+    offs = models.Calender.objects.all()
     return render(request, "hr/day_off.html", locals())
+
+def delete_off(request,id):
+    if not request.session.get('is_hr',None):
+        return redirect("/index/")
+    try:
+        day_off = models.Calender.objects.get(id=id)
+        day_off.delete()
+    except:
+        pass
+    return redirect("/hr/set_day_off/")

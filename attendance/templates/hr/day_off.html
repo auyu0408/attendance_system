@@ -18,10 +18,15 @@
             </form>
         </div>
         <div class="col list">
-            <ul class="list">
+            <a href="/hr/menu/" class="btn btn-info">回前頁</a>
+            <ul class="list-calender list">
                 {% for off in offs %}
-                    <ul class="list-group-item list-group-item-light list-group-item-action"></ul>
-                {% foreach %}
+                <div class="row d-flex justify-content-end">
+                    <ul class="col-8 list-group-item list-group-item-light list-group-item-action">
+                        {{off.day}} {{off.sort}}     <a href="/hr/delete_off/{{off.id}}/" class="btn btn-outline-danger">Del</a>
+                    </ul>
+                </div>
+                {% endfor %}
             </ul>
         </div>
         <script>
