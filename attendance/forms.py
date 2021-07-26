@@ -81,3 +81,11 @@ class DailyForm(forms.Form):
 class MonthForm(forms.Form):
     year = forms.IntegerField(label="年", widget=forms.TextInput(attrs={'class':'form-control','autofocus':'','placeholder':'年'}))
     month = forms.IntegerField(label="月", widget=forms.TextInput(attrs={'class':'form-control','placeholder':'月'}))
+
+class DayForm(forms.Form):
+    Sort=(
+        ('六','休息日'),
+        ('日','例假日'),
+    )
+    day = forms.DateField(label="日期",widget=forms.DateInput(attrs={'class':'form-control', 'placeholder':'日期'}))
+    sort = forms.ChoiceField(label="類型", choices=Sort)

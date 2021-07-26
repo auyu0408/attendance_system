@@ -2,6 +2,7 @@
 from collections import namedtuple
 import datetime
 from django.core.checks import messages
+from django.db.models.fields import reverse_related
 from django.http import request
 from django.http.response import HttpResponse
 from django.shortcuts import redirect, render
@@ -49,6 +50,22 @@ def login(request):
         else:
             return render(request, 'login/login.html', {'message': message})
     return render(request, 'login/login.html')
+
+def set_admin(request):
+    try:
+        admin = models.User.objects.get(name="admin")
+    except:
+        admin = models.User()
+        admin.name = "admin"
+        admin.user_id = "admin"
+        admin.passwd = make_password("admin")
+        admin.email = "admin@gmail.com"
+        admin.department = "superadmin"
+        admin.salary = 1
+        admin.hr = True
+        admin.manager = True
+        admin.save()
+    return redirect("/login/")
 
 def profile(request):
     if not request.session.get('is_login', None):
@@ -337,6 +354,10 @@ def show_overtime(request, id):
     user = models.User.objects.get(id=request.session['user_id'])
     try:
         overtime = models.Overtime.objects.get(id=id)
+        try:
+            daily = models.Daily.objects.get(year=overtime.year, month=overtime.month, day=overtime.day, user_id=overtime.user_id)
+        except:
+            pass
     except:
         return redirect("/overtime_list/")
     if not request.session.get('is_login', None):
@@ -777,7 +798,7 @@ def hr_salary(request):
         if month_form.is_valid():
             year = month_form.cleaned_data.get('year')
             month = month_form.cleaned_data.get('month')
-            Users = models.User.objects.filter(status=0,id=4).exclude(name="admin")
+            Users = models.User.objects.filter(status=0).exclude(name="admin")
             for user in Users:
                 try:
                     total = models.Total.objects.get(user_id__id=user.id, month=month, year=year)
@@ -811,6 +832,7 @@ def hr_salary(request):
                     else:
                         if flag:
                             total.tax_over += overtime.one_third
+                            total.over_13 += overtime.one_third
                             total.tax_over_add += overtime.one_third*(minute_rate*4/3)
                         else:
                             total.over_13 += overtime.one_third
@@ -818,13 +840,10 @@ def hr_salary(request):
                             if all_time == 46*60:
                                 flag = 1
                             elif all_time > 46*60:
-                                print(all_time)
                                 flag = 1
                                 tax = all_time - 46*60
-                                print(tax)
                                 total.tax_over += tax
                                 total.free_over += overtime.one_third - tax
-                                print(total.free_over)
                                 total.tax_over_add += tax*(minute_rate*4/3)
                                 total.free_over_add += (overtime.one_third - tax)*(minute_rate*4/3)
                             else:
@@ -832,6 +851,7 @@ def hr_salary(request):
                                 total.free_over_add += overtime.one_third*(minute_rate*4/3)
                         if flag:
                             total.tax_over += overtime.two_third
+                            total.over_23 += overtime.two_third
                             total.tax_over_add += overtime.two_third*(minute_rate*5/3)
                         else:
                             total.over_23 += overtime.two_third
@@ -839,19 +859,17 @@ def hr_salary(request):
                             if all_time == 46*60:
                                 flag = 1
                             elif all_time > 46*60:
-                                print(all_time)
                                 flag = 1
                                 tax = all_time - 46*60
                                 total.tax_over += tax
                                 total.free_over += overtime.two_third - tax
-                                total.tax_over_add += tax*(minute_rate*4/3)
-                                total.free_over_add += (overtime.two_third - tax)*(minute_rate*4/3)
+                                total.tax_over_add += tax*(minute_rate*5/3)
+                                total.free_over_add += (overtime.two_third - tax)*(minute_rate*5/3)
                             else:
                                 total.free_over += overtime.two_third
-                                total.free_over_add += overtime.two_third*(minute_rate*4/3)
-                print(total.tax_over)
-                total.tax_over = round(total.tax_over/60,2)
-                total.free_over = round(total.free_over/60,2)
+                                total.free_over_add += overtime.two_third*(minute_rate*5/3)
+                    total.tax_over_add = round(total.tax_over_add,2)
+                    total.free_over_add = round(total.free_over_add,2)
                 #leave
                 Leaves = models.Leave.objects.filter(user_id__id=user.id, month=month, year=year, checked=True)
                 for leave in Leaves:
@@ -915,9 +933,9 @@ def hr_salary(request):
                 for daily in Dailys:
                     total.leave_early += daily.leave_early_fixed
                 decrease = total_leave.care_deduce + total_leave.sick_deduce +total_leave.other1_deduce + total_leave.other2_deduce + total_leave.other3_deduce + total_leave.other4_deduce + total_leave.unpaid_deduce + total_leave.nursery_deduce + total_leave.personal_deduce + total_leave.menstrual_deduce
-                decrease += total.leave_early * minute_rate
+                decrease += total.leave_early * minute_rate + user.retire_self
                 total.tax = user.salary - decrease + total.tax_over_add
-                decrease += function.convert_labor(user.labor) + function.convert_health(user.health) + user.retire_self
+                decrease += function.convert_labor(user.labor) + function.convert_health(user.health) 
                 total.decrease = decrease
                 total.actual_salary = user.salary - total.decrease + total.tax_over_add + total.free_over_add
                 total.save()
@@ -963,6 +981,8 @@ def show_total(request, totalid=0):
     labor = function.convert_labor(total.user_id.labor)
     health = function.convert_health(total.user_id.health)
     retire = function.convert_retirement(total.user_id.retirement)
+    tax_over = round(total.tax_over/60,2)
+    free_over = round(total.free_over/60,2)
     return render(request, "hr/display_total.html", locals())
 
 def salary_pass(request):
@@ -1074,3 +1094,9 @@ def check_in_out(request):
         #    daily.save()
         message = f"{user.name}簽到成功"
     return render(request, 'hr/check_in_out.html', {'message': message})
+
+def day_off(request):
+    if not request.session.get('is_hr', None):
+        return redirect("/index/")
+    day_form = forms.DayForm()
+    return render(request, "hr/day_off.html", locals())

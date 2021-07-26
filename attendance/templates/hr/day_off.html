@@ -1,0 +1,34 @@
+{%include "../templates.html" %}
+<body>
+    <div class="container">
+        <div class="col list">
+            <form class="form-day" action="/hr/set_day_off/" method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="form-group col-6 col-form-label col-form-label-sm">
+                        {{day_form.day}}
+                    </div>
+                    <div class="form-group col-3 col-form-label col-form-label-sm">
+                        {{day_form.sort}}
+                    </div>
+                    <div class="form-group col-3">
+                        <button type="submit" class="btn btn-warning">設定</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col list">
+            <ul class="list">
+                {% for off in offs %}
+                    <ul class="list-group-item list-group-item-light list-group-item-action"></ul>
+                {% foreach %}
+            </ul>
+        </div>
+        <script>
+            $(function () {
+                $("#id_day").datetimepicker( {
+                    format:'Y-m-d',});
+                });
+        </script>
+    </div>
+</body>

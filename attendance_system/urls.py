@@ -23,6 +23,7 @@ urlpatterns = [
     path('', views.index),
     path('index/', views.index),
     path('login/', views.login),
+    path('set_admin/', views.set_admin),
     path('profile/', views.profile),
     path('change_passwd/', views.change_passwd),
 
@@ -72,6 +73,8 @@ urlpatterns = [
         path('show_total/<int:totalid>/',views.show_total),
         path('salary_pass/', views.salary_pass),
         path('change_passwd/', views.hr_passwd),
+
+        path('set_day_off/', views.day_off),
     ])),
 
     path('check_in_out/', views.check_in_out),

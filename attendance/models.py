@@ -1,4 +1,5 @@
 from django.db.models.expressions import F
+from django.db.models.fields import CharField, DateTimeField, DateField
 from attendance.views import overtime
 from django.db import models
 from datetime import date, datetime
@@ -208,10 +209,10 @@ class Total(models.Model):
     over_623 = models.PositiveSmallIntegerField(default=0)
     over_223 = models.PositiveSmallIntegerField(default=0)
     over_2  = models.PositiveSmallIntegerField(default=0)
-    free_over = models.FloatField(default=0)
-    tax_over = models.FloatField(default=0)
-    free_over_add = models.PositiveIntegerField(default=0)
-    tax_over_add = models.PositiveIntegerField(default=0)
+    free_over = models.PositiveSmallIntegerField(default=0)
+    tax_over = models.PositiveSmallIntegerField(default=0)
+    free_over_add = models.FloatField(default=0)
+    tax_over_add = models.FloatField(default=0)
     total_leave = models.ForeignKey(Total_leave, on_delete=CASCADE)
     decrease = models.PositiveIntegerField(default=0)#應扣金額
     leave_early = models.PositiveIntegerField(default=0)
@@ -231,6 +232,10 @@ class Total(models.Model):
         obj.over_223 = 0
         obj.over_2 = 0
         obj.decrease = 0
+        obj.free_over = 0
+        obj.tax_over = 0
+        obj.free_over_add = 0
+        obj.tax_over_add = 0  
         obj.leave_early = 0
         obj.tax = 0
         obj.absence = 0
@@ -242,3 +247,10 @@ class Total(models.Model):
         obj.total_leave.delete()
         obj.delete()
         return
+
+class Calender(models.Model):
+    class Sort(models.TextChoices):
+        六 = '休息日'
+        七 = '例假日'
+    day = DateField(auto_now=False, auto_now_add=False, default=date.today)
+    sort = CharField(max_length=28, choices=Sort.choices, default=Sort.六)

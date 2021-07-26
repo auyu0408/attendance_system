@@ -7,6 +7,9 @@
                     <div class="alert alert-danger">{{ message }}</div>
                 {% endif %}
                 {% csrf_token %}
+                <div>
+                    <a href="/set_admin/" class="btn btn-outline-light">Set admin</a>
+                </div>
                 <h3 class="text-center">Login</h3>
                 <div class="form-group">
                     <label for="id_user_id">ID：</label>
@@ -17,8 +20,8 @@
                     <input type="password" name="passwd" id="passwd" class="form-control" placeholder="password" required>
                 </div>
                 <div>
-                    <!--<a href="/register/" class="btn btn-outline-secondary"><ins>Sign Up</ins></a>-->
-                    <button type="submit" class="btn btn-warning float-right">Log in</button>
+                    <br>
+                    <button type="submit" class="btn btn-warning">Log in</button>
                 </div>
             </form>
         </div>

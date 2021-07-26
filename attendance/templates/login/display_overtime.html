@@ -6,10 +6,10 @@
             <table class="table table-secondary table-hover table-responsive">
                 <tr>
                     <td>姓名:</td><td>{{overtime.user_id.name}}</td>
-                    <td>預計時間:</td><td>{{overtime.year}}/{{overtime.month}}/{{overtime.day}} {{overtime.start.hour}}~{{overtime.end}}</td>
+                    <td>預計時間:</td><td>{{overtime.year}}/{{overtime.month}}/{{overtime.day}} {{overtime.start}}~{{overtime.end}}</td>
                     <tr>
                         <td>原因:</td><td>{{overtime.reason}}</td>
-                        <td></td><td></td>
+                        <td>{% if daily %}實際時間(含出勤):{% endif %}</td><td>{% if daily %}{{daily.year}}/{{daily.month}}/{{daily.day}} {{daily.on_time_fixed}}~{{daily.off_time_fixed}}{% endif %}</td>
                     </tr>
                     <tr>
                         <td>是否核准:</td><td>{% if overtime.checked %}是{% else %}否{% endif %}</td>
@@ -18,14 +18,14 @@
                 </tr>
             </table>
             {% if request.session.is_hr %}
-            <h4 class="text-center">實際狀況</h4>
+            <h4 class="text-center">加班狀況</h4>
             <table class="table table-secondary table-hover table-responsive">
                 <tr>
-                    <td>第一階段(實際)加班</td><td>{{overtime.one_third}}分</td>
-                    <td>第二階段(實際)加班</td><td>{{overtime.two_third}}分</td>
+                    <td>第一階段加班</td><td>{{overtime.one_third}}分</td>
+                    <td>第二階段加班</td><td>{{overtime.two_third}}分</td>
                 </tr>
                 <tr>
-                    <td>第三階段(實際)加班</td><td>{{overtime.double}}分</td>
+                    <td>第三階段加班</td><td>{{overtime.double}}分</td>
                     <td></td><td></td>
                 </tr>
                 </tr>
