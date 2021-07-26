@@ -35,14 +35,14 @@ python manage.py runserver
 - there have four kinds of identity, boss, hr, manager, staff
 - there also have some department, such as: 業務部1, 業務部2, 人事部, 會計部, boss
 - 以下是各個身份的界面
-  - staff
-    ![](https://i.imgur.com/aspt7Fj.png)
-  - manager
-    ![](https://i.imgur.com/od5ReIh.png)
-  - hr
-    ![](https://i.imgur.com/EUcgzEK.png)
-  - boss
-    ![](https://i.imgur.com/RC6TCJj.png)
+  - staff  
+    ![](https://i.imgur.com/aspt7Fj.png)  
+  - manager  
+    ![](https://i.imgur.com/od5ReIh.png)  
+  - hr  
+    ![](https://i.imgur.com/EUcgzEK.png)  
+  - boss  
+    ![](https://i.imgur.com/RC6TCJj.png)  
 - manager 能看到的假單和加班單是自己部門底下的職員，boss則能看到manager身份的
 - manager不能批准自己的假單和加班單，boss可以
 - admin有staff, manager和hr的身份
