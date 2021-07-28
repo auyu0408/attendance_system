@@ -20,7 +20,7 @@
                 </tr>
                 <tr>
                     <td>是否核准:</td><td>{% if leave.checked %}是{% else %}否{% endif %}</td>
-                    <td></td><td></td>
+                    <td>{{str}}</td><td>已休{{day}}天</td>
                 </tr>
             </table>
             {% if request.session.user_id == leave.user_id.id %}
@@ -34,6 +34,9 @@
             {% endif %}
             {% if request.session.user_id == leave.user_id.id and leave.checked == False %}
                 <a href="/leave/{{id}}/" class="btn btn-secondary">修改假卡</a>
+            {% endif %}
+            {% if request.session.user_id == leave.user_id.id %}
+                <a href="/delete_leave/{{id}}/" class="btn btn-danger">取消請假</a>
             {% endif %}
             {% if leave.user_id.manager and request.session.is_boss %}
                 {% if leave.checked == False %}

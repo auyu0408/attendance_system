@@ -26,10 +26,9 @@ class User(models.Model):
     department = models.CharField(max_length=128)
     on_job = models.DateField(auto_now=False, auto_now_add=False, default=date.today)
     resign = models.DateField(auto_now=False, auto_now_add=False, default=date.today)
-    salary = models.PositiveIntegerField()
+    salary = models.PositiveIntegerField(default=0)
     seniority = models.PositiveSmallIntegerField(default=0)
     annual = models.PositiveSmallIntegerField(default=0)
-    annual_used = models.PositiveSmallIntegerField(default=0)
     #Deductible 
     labor = models.PositiveSmallIntegerField(default=1)
     health = models.PositiveSmallIntegerField(default=1)

@@ -37,6 +37,7 @@ urlpatterns = [
     path('leave/', views.leave),
     path('leave/<int:id>/', views.leave),
     path('display_leave/<int:id>/', views.show_leave),
+    path('delete_leave/<int:id>/', views.delete_leave),
 
     path('overtime_list/', views.overtime_list),
     path('overtime/', views.overtime),

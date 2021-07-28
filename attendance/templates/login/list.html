@@ -21,7 +21,7 @@
             <h4 class="text-center"><br>{{checked}}</h4>
             <ul class="list-group list">
                 {% for check in checks %}
-                <a href ="/display_{{title}}/{{check.id}}/" class="list-group-item list-group-item-light list-group-item-action">請假日:{{check.start.month}}/{{check.start.day}}</a> 
+                <a href ="/display_{{title}}/{{check.id}}/" class="list-group-item list-group-item-light list-group-item-action">請假日:{{check.start.month}}/{{check.start.day}} {{check.new}}</a> 
                 {% endfor %}
             </ul>
             {% endif %}
@@ -34,7 +34,7 @@
             <h4 class="text-center"><br>{{checked}}</h4>
             <ul class="list-group list">
                 {% for check in checks %}
-                <a href ="/display_{{title}}/{{check.id}}/" class="list-group-item list-group-item-light list-group-item-action">請假日:{{check.month}}/{{check.day}}</a> 
+                <a href ="/display_{{title}}/{{check.id}}/" class="list-group-item list-group-item-light list-group-item-action">請假日:{{check.month}}/{{check.day}} {{check.new}}</a> 
                 {% endfor %}
             </ul>
             {% endif %}

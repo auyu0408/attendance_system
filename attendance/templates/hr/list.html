@@ -13,7 +13,7 @@
                     {{object.department}}-{{object.name}}
                     {% endif %}
                     {% if mode == "leave" %}
-                    {{object.start}}-{{object.category}}
+                    {{object.start}}-{{object.category}} {{object.str}}
                     {% endif %}
                     {% if mode == "overtime" %}
                     {{object.month}}/{{object.day}}-{{object.reason}}

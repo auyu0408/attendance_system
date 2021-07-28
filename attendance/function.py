@@ -49,10 +49,10 @@ def retire_M(level):
     money = stander[0][level]
     return money
 
-def get_seniority(year, month, day):
-    y = datetime.date.today().year - datetime.date(year,month,day).year
-    m = datetime.date.today().month - datetime.date(year, month, day).month
-    d = datetime.date.today().day - datetime.date(year, month, day).day
+def get_seniority(year, month, day, year2, month2, day2):
+    y = datetime.date(year2, month2, day2).year - datetime.date(year,month,day).year
+    m = datetime.date(year2, month2, day2).month - datetime.date(year, month, day).month
+    d = datetime.date(year2, month2, day2).day - datetime.date(year, month, day).day
     if d < 0:
         m -=1
     seniority = y + round(float(m)/12,2)

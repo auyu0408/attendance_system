@@ -71,7 +71,19 @@ def profile(request):
     if not request.session.get('is_login', None):
         return redirect("/login/")
     user = models.User.objects.get(id=request.session['user_id'])
+    date = datetime.date.today()
+    user.seniority = function.get_seniority(user.on_job.year, user.on_job.month, user.on_job.day, date.year, date.month, date.day)
+    user.annual = function.get_annual(user.seniority)
+    user.save()
+    if date > datetime.date(date.year, user.on_job.month, user.on_job.day):
+        due = date.year
+    else:
+        due = date.year - 1
+    Annual_leave = models.Leave.objects.filter(category="特休", start__gte=datetime.datetime(due,user.on_job.month,user.on_job.day), user_id=user)
     annual = 0
+    for obj in Annual_leave:
+        annual += obj.total
+    annual_left = user.annual-annual
     back = "/index/"
     return render(request, 'login/profile.html', locals())
 
@@ -268,12 +280,69 @@ def show_leave(request, id):
     user = models.User.objects.get(id=request.session['user_id'])
     try:
         leave = models.Leave.objects.get(id=id)
+        if leave.category != "特休":
+            Other = models.Leave.objects.filter(user_id=leave.user_id, category=leave.category, year=leave.year)
+            day = 0
+            for obj in Other:
+                day += obj.total
+            if leave.category == "病假":
+                str = "可休30天"
+            elif leave.category == "事假":
+                str = "可休14天"
+            else:
+                str = ""
+        else:
+            user = leave.user_id
+            if leave.start > datetime.datetime(leave.year, user.on_job.month, user.on_job.day):
+                due = leave.year
+            else:
+                due = leave.year - 1
+            annual = function.get_annual(function.get_seniority(user.on_job.year, user.on_job.month, user.on_job.day, leave.year, leave.month, leave.start.day))
+            Annual = models.Leave.objects.filter(user_id=user, start__gte=datetime.datetime(due, user.on_job.month, user.on_job.day), category=leave.category).exclude(start__gt=leave.start)
+            day = 0
+            str = f"可休{annual}天"
+            for obj in Annual:
+                day += obj.total
     except:
         return redirect("/leave_list/")
     if request.session['user_id'] == leave.user_id.id or (request.session['is_manager'] and user.department == leave.user_id.department) or request.session['is_hr']:
         return render(request, "login/display_leave.html", locals())
     else:
         return redirect("/leave_list/")
+
+def delete_leave(request, id):
+    if not request.session.get('is_login', None):
+        return redirect("/login/")
+    try:
+        leave = models.Leave.objects.get(id=id)
+        if request.session['user_id'] == leave.user_id.id:
+            pass
+        else:
+            return redirect("/leave_list/")
+    except:
+        return redirect("/leave_list/")
+    day = leave.end.day - leave.start.day
+    if day == 0:
+        try:
+            daily = models.Daily.objects.get(year=leave.year, month=leave.month, day=leave.start.day, user_id=leave.user_id)
+        except:
+            pass
+        daily.holiday -= 0
+        daily.holiday_reason = ""
+        daily.check = False
+        daily.save()
+    else:
+        for date in range(leave.start.day, leave.end.day+1):
+            try:
+                daily = models.Daily.objects.get(year=leave.year, month=leave.month, day=date, user_id=leave.user_id)
+            except:
+                continue
+            daily.holiday = 0
+            daily.holiday_reason = ""
+            daily.check = False
+            daily.save()
+    leave.delete()
+    return redirect("/leave_list/")
 
 
 def overtime(request, id=0):
@@ -697,6 +766,31 @@ def hr_leave(request, id=0):
         title = f"{year}/{mon} {user.name}的已核准假單"
         href = "/display_leave"
         back = "/hr/leave/"
+        for obj in objects:
+            if obj.category != "特休":
+                Others = models.Leave.objects.filter(user_id=user, category=obj.category, year=obj.year)
+                day = 0
+                for other in Others:
+                    day += other.total
+                if obj.category == "病假":
+                    str = "可休30天"
+                elif obj.category == "事假":
+                    str = "可休14天"
+                else:
+                    str = ""
+                obj.str = f"{str} 已休{day}天"
+            else:
+                if obj.start > datetime.datetime(obj.year, user.on_job.month, user.on_job.day):
+                    due = obj.year
+                else:
+                    due = obj.year - 1
+                annual = function.get_annual(function.get_seniority(user.on_job.year, user.on_job.month, user.on_job.day, obj.year, obj.month, obj.start.day))
+                Annual = models.Leave.objects.filter(user_id=user, start__gte=datetime.datetime(due, user.on_job.month, user.on_job.day), category=obj.category).exclude(start__gt=obj.start)
+                day = 0
+                str = f"可休{annual}天"
+                for other in Annual:
+                    day += other.total
+                obj.str = f"{str} 已休{day}天"
         return render(request, 'hr/list.html', locals())
 
 def hr_overtime(request, id=0):
@@ -959,7 +1053,6 @@ def hr_salary(request):
                         pass
                 total_leave.save()
                 total.total_leave = total_leave
-                user.annual_used += total_leave.annual
                 #late
                 Dailys = models.Daily.objects.filter(user_id__id=user.id, month=month, year=year, check=True)
                 for daily in Dailys:
@@ -1010,11 +1103,24 @@ def show_total(request, totalid=0):
         total = models.Total.objects.get(id=totalid)
     except:
         return redirect("/hr/salary/")
-    labor = function.convert_labor(total.user_id.labor)
-    health = function.convert_health(total.user_id.health)
-    retire = function.convert_retirement(total.user_id.retirement)
+    user = total.user_id
+    today = datetime.date.today()
+    seniority = function.get_seniority(user.on_job.year, user.on_job.month, user.on_job.day, total.year, total.month+1, 1)
+    annual = function.get_annual(seniority)
+    labor = function.convert_labor(user.labor)
+    health = function.convert_health(user.health)
+    retire = function.convert_retirement(user.retirement)
     tax_over = round(total.tax_over/60,2)
     free_over = round(total.free_over/60,2)
+    if datetime.date.today() > datetime.date(total.year, user.on_job.month, user.on_job.day):
+        due = datetime.date.today().year-1
+    else:
+        due = datetime.date.today().year
+    Annual_leave = models.Leave.objects.filter(start__gte=datetime.datetime(due,user.on_job.month,user.on_job.day), user_id=user, category="特休").exclude(start__gte=datetime.datetime(total.year, total.month+1, 1))
+    day = 0
+    for obj in Annual_leave:
+        day += obj.total
+    annual_left = annual-day
     return render(request, "hr/display_total.html", locals())
 
 def salary_pass(request):
