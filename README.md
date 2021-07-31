@@ -12,16 +12,26 @@
 ### Environment Setup  
 
   1. initialize python environment  
-  `make init`  
+  ```
+  make init
+  ```  
   2. Database migrate(sqlite)  
-  `make migrate`
+  ```
+  make migrate
+  ```
   3. Start the service  
-  `pipenv run python manage.py runserver`  
+  ```
+  pipenv run python manage.py runserver
+  ```  
   The server will run at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)  
   4. Stop service  
-  `Ctrl+c`  
+  ```
+  Ctrl+c
+  ```  
   5. Delete Database  
-  `make clean`  
+  ```
+  make clean
+  ```  
 
 ## Use  
 
